@@ -1,0 +1,167 @@
+Created by PLY version 3.11 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    ACCEPT
+    ALPHABET
+    AUTOMATON
+    BLANK
+    COMA
+    COMENTARIO_BLOQUE
+    COMENTARIO_LINEA
+    CORCHETE_A
+    CORCHETE_B
+    DFA
+    EPSILON
+    IDENTIFICADOR
+    INITIAL
+    INPUT
+    LEFT
+    MOVE
+    NFA
+    PDA
+    POP
+    PUSH
+    READ
+    RIGHT
+    SIMBOLO
+    STACK_ALPHABET
+    STACK_START
+    STATES
+    STAY
+    TAPE_ALPHABET
+    TM
+    TRANSICION
+    TRANSITIONS
+    TYPE
+    WRITE
+
+Grammar
+
+Rule 0     S' -> programa
+Rule 1     programa -> BEGIN bloque_codigo END
+Rule 2     bloque_codigo -> LLAVE_A lista_declaraciones LLAVE_C
+Rule 3     lista_declaraciones -> declaracion
+Rule 4     lista_declaraciones -> si
+Rule 5     lista_declaraciones -> mientras
+Rule 6     lista_declaraciones -> lista_declaraciones lista_declaraciones
+Rule 7     declaracion -> tipo ID ASIGNACION expresion PUNTOCOMA
+Rule 8     declaracion -> tipo ID ASIGNACION expresion
+Rule 9     declaracion -> tipo ID ASIGNACION PUNTOCOMA
+Rule 10    tipo -> int
+Rule 11    tipo -> bool
+Rule 12    tipo -> stg
+Rule 13    tipo -> real
+Rule 14    expresion -> expresion SUMA expresion
+Rule 15    expresion -> expresion RESTA expresion
+Rule 16    expresion -> expresion MULTIPLICACION expresion
+Rule 17    expresion -> expresion DIVISION expresion
+Rule 18    expresion -> expresion MENORQUE expresion
+Rule 19    expresion -> expresion MENORIGUAL expresion
+Rule 20    expresion -> expresion MAYORQUE expresion
+Rule 21    expresion -> expresion MAYORIGUAL expresion
+Rule 22    expresion -> expresion IGUAL expresion
+Rule 23    expresion -> expresion DIFERENTE expresion
+Rule 24    expresion -> PARENTESIS_A expresion PARENTESIS_B
+Rule 25    expresion -> NUMERO
+Rule 26    expresion -> REAL
+Rule 27    expresion -> CADENA
+Rule 28    expresion -> True
+Rule 29    expresion -> False
+Rule 30    si -> IF PARENTESIS_A expresion PARENTESIS_B bloque_codigo
+Rule 31    si -> IF PARENTESIS_A expresion PARENTESIS_B bloque_codigo ELSE bloque_codigo
+Rule 32    mientras -> WHILE PARENTESIS_A expresion PARENTESIS_B bloque_codigo
+Rule 33    for_loop -> FOR PARENTESIS_A for_init PUNTOCOMA for_condicion PUNTOCOMA for_actualizacion PARENTESIS_B bloque_codigo
+Rule 34    for_init -> tipo ID ASIGNACION expresion
+Rule 35    for_init -> ID ASIGNACION expresion
+Rule 36    for_condicion -> expresion
+Rule 37    for_actualizacion -> ID ASIGNACION expresion
+Rule 38    for_actualizacion -> ID MASMAS
+Rule 39    for_actualizacion -> ID MENOSMENOS
+
+Terminals, with rules where they appear
+
+ACCEPT               : 
+ALPHABET             : 
+ASIGNACION           : 7 8 9 34 35 37
+AUTOMATON            : 
+BLANK                : 
+COMA                 : 
+COMENTARIO_BLOQUE    : 
+COMENTARIO_LINEA     : 
+CORCHETE_A           : 
+CORCHETE_B           : 
+DFA                  : 
+EPSILON              : 
+IDENTIFICADOR        : 
+INITIAL              : 
+INPUT                : 
+LEFT                 : 
+LLAVE_A              : 2
+LLAVE_C              : 2
+MOVE                 : 
+NFA                  : 
+PDA                  : 
+POP                  : 
+PUNTOCOMA            : 7 9 33 33
+PUSH                 : 
+READ                 : 
+RIGHT                : 
+SIMBOLO              : 
+STACK_ALPHABET       : 
+STACK_START          : 
+STATES               : 
+STAY                 : 
+TAPE_ALPHABET        : 
+TM                   : 
+TRANSICION           : 
+TRANSITIONS          : 
+TYPE                 : 
+WRITE                : 
+error                : 
+
+Nonterminals, with rules where they appear
+
+BEGIN                : 1
+CADENA               : 27
+DIFERENTE            : 23
+DIVISION             : 17
+ELSE                 : 31
+END                  : 1
+FOR                  : 33
+False                : 29
+ID                   : 7 8 9 34 35 37 38 39
+IF                   : 30 31
+IGUAL                : 22
+MASMAS               : 38
+MAYORIGUAL           : 21
+MAYORQUE             : 20
+MENORIGUAL           : 19
+MENORQUE             : 18
+MENOSMENOS           : 39
+MULTIPLICACION       : 16
+NUMERO               : 25
+PARENTESIS_A         : 24 30 31 32 33
+PARENTESIS_B         : 24 30 31 32 33
+REAL                 : 26
+RESTA                : 15
+SUMA                 : 14
+True                 : 28
+WHILE                : 32
+bloque_codigo        : 1 30 31 31 32 33
+bool                 : 11
+declaracion          : 3
+expresion            : 7 8 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 30 31 32 34 35 36 37
+for_actualizacion    : 33
+for_condicion        : 33
+for_init             : 33
+for_loop             : 
+int                  : 10
+lista_declaraciones  : 2 6 6
+mientras             : 5
+programa             : 0
+real                 : 13
+si                   : 4
+stg                  : 12
+tipo                 : 7 8 9 34
+
