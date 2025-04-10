@@ -171,14 +171,21 @@ def p_atributos(p):
     else:
         p[0] = p[1] + [p[3]]
 
-# Definición de un atributo
+# Definición de un atributo, se acepta tanto si la palabra es reconocida como IDENTIFICADOR
 def p_atributo(p):
     """
     atributo : IDENTIFICADOR ASIGNACION valor
     """
     p[0] = (p[1], p[3])
 
-# Definición de un valor (puede ser un símbolo, EPSILON o identificador)
+# Permitir que ciertos nombres reservados (por ejemplo, "input") sean reconocidos en atributos.
+def p_atributo_reserved(p):
+    """
+    atributo : INPUT ASIGNACION valor
+    """
+    p[0] = (p[1], p[3])
+
+# Definición de un valor (puede ser un símbolo, EPSILON, identificador o direcciones)
 def p_valor(p):
     """
     valor : SIMBOLO
@@ -223,14 +230,14 @@ def p_elemento(p):
     """
     p[0] = p[1]
 
-# Errores sintácticos
+# Manejo de errores sintácticos
 def p_error(p):
     if p:
         errores_Sinc_Desc.append(f"Error de sintaxis en '{p.value}' en la línea {p.lineno}")
     else:
         errores_Sinc_Desc.append("Error de sintaxis al final del archivo")
 
-# Construir el analizador
+# Construir el analizador sintáctico
 parser = yacc.yacc()
 
 def test_parser(codigo):

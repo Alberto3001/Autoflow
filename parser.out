@@ -2,166 +2,1273 @@ Created by PLY version 3.11 (http://www.dabeaz.com/ply)
 
 Unused terminals:
 
-    ACCEPT
-    ALPHABET
-    AUTOMATON
-    BLANK
-    COMA
     COMENTARIO_BLOQUE
     COMENTARIO_LINEA
-    CORCHETE_A
-    CORCHETE_B
-    DFA
-    EPSILON
-    IDENTIFICADOR
-    INITIAL
-    INPUT
-    LEFT
     MOVE
-    NFA
-    PDA
     POP
     PUSH
     READ
-    RIGHT
-    SIMBOLO
-    STACK_ALPHABET
-    STACK_START
-    STATES
-    STAY
-    TAPE_ALPHABET
-    TM
-    TRANSICION
-    TRANSITIONS
-    TYPE
     WRITE
 
 Grammar
 
 Rule 0     S' -> programa
-Rule 1     programa -> BEGIN bloque_codigo END
-Rule 2     bloque_codigo -> LLAVE_A lista_declaraciones LLAVE_C
-Rule 3     lista_declaraciones -> declaracion
-Rule 4     lista_declaraciones -> si
-Rule 5     lista_declaraciones -> mientras
-Rule 6     lista_declaraciones -> lista_declaraciones lista_declaraciones
-Rule 7     declaracion -> tipo ID ASIGNACION expresion PUNTOCOMA
-Rule 8     declaracion -> tipo ID ASIGNACION expresion
-Rule 9     declaracion -> tipo ID ASIGNACION PUNTOCOMA
-Rule 10    tipo -> int
-Rule 11    tipo -> bool
-Rule 12    tipo -> stg
-Rule 13    tipo -> real
-Rule 14    expresion -> expresion SUMA expresion
-Rule 15    expresion -> expresion RESTA expresion
-Rule 16    expresion -> expresion MULTIPLICACION expresion
-Rule 17    expresion -> expresion DIVISION expresion
-Rule 18    expresion -> expresion MENORQUE expresion
-Rule 19    expresion -> expresion MENORIGUAL expresion
-Rule 20    expresion -> expresion MAYORQUE expresion
-Rule 21    expresion -> expresion MAYORIGUAL expresion
-Rule 22    expresion -> expresion IGUAL expresion
-Rule 23    expresion -> expresion DIFERENTE expresion
-Rule 24    expresion -> PARENTESIS_A expresion PARENTESIS_B
-Rule 25    expresion -> NUMERO
-Rule 26    expresion -> REAL
-Rule 27    expresion -> CADENA
-Rule 28    expresion -> True
-Rule 29    expresion -> False
-Rule 30    si -> IF PARENTESIS_A expresion PARENTESIS_B bloque_codigo
-Rule 31    si -> IF PARENTESIS_A expresion PARENTESIS_B bloque_codigo ELSE bloque_codigo
-Rule 32    mientras -> WHILE PARENTESIS_A expresion PARENTESIS_B bloque_codigo
-Rule 33    for_loop -> FOR PARENTESIS_A for_init PUNTOCOMA for_condicion PUNTOCOMA for_actualizacion PARENTESIS_B bloque_codigo
-Rule 34    for_init -> tipo ID ASIGNACION expresion
-Rule 35    for_init -> ID ASIGNACION expresion
-Rule 36    for_condicion -> expresion
-Rule 37    for_actualizacion -> ID ASIGNACION expresion
-Rule 38    for_actualizacion -> ID MASMAS
-Rule 39    for_actualizacion -> ID MENOSMENOS
+Rule 1     programa -> automata_def
+Rule 2     programa -> programa automata_def
+Rule 3     automata_def -> AUTOMATON IDENTIFICADOR LLAVE_A definicion_automa LLAVE_C
+Rule 4     definicion_automa -> propiedades transiciones_def
+Rule 5     propiedades -> propiedad
+Rule 6     propiedades -> propiedades propiedad
+Rule 7     propiedad -> type_def
+Rule 8     propiedad -> alphabet_def
+Rule 9     propiedad -> states_def
+Rule 10    propiedad -> initial_def
+Rule 11    propiedad -> accept_def
+Rule 12    propiedad -> stack_alphabet_def
+Rule 13    propiedad -> stack_start_def
+Rule 14    propiedad -> tape_alphabet_def
+Rule 15    propiedad -> blank_def
+Rule 16    type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA
+Rule 17    tipo_automa -> DFA
+Rule 18    tipo_automa -> NFA
+Rule 19    tipo_automa -> PDA
+Rule 20    tipo_automa -> TM
+Rule 21    alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+Rule 22    states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA
+Rule 23    initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA
+Rule 24    accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA
+Rule 25    stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+Rule 26    stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA
+Rule 27    stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA
+Rule 28    tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+Rule 29    blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA
+Rule 30    blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA
+Rule 31    transiciones_def -> TRANSITIONS LLAVE_A lista_transiciones LLAVE_C
+Rule 32    lista_transiciones -> transicion_def
+Rule 33    lista_transiciones -> lista_transiciones transicion_def
+Rule 34    transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA
+Rule 35    atributos -> atributo
+Rule 36    atributos -> atributos COMA atributo
+Rule 37    atributo -> IDENTIFICADOR ASIGNACION valor
+Rule 38    atributo -> INPUT ASIGNACION valor
+Rule 39    valor -> SIMBOLO
+Rule 40    valor -> EPSILON
+Rule 41    valor -> IDENTIFICADOR
+Rule 42    valor -> LEFT
+Rule 43    valor -> RIGHT
+Rule 44    valor -> STAY
+Rule 45    conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C
+Rule 46    conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C
+Rule 47    elementos_conjunto -> elemento
+Rule 48    elementos_conjunto -> elementos_conjunto COMA elemento
+Rule 49    elemento -> SIMBOLO
+Rule 50    elemento -> IDENTIFICADOR
 
 Terminals, with rules where they appear
 
-ACCEPT               : 
-ALPHABET             : 
-ASIGNACION           : 7 8 9 34 35 37
-AUTOMATON            : 
-BLANK                : 
-COMA                 : 
+ACCEPT               : 24
+ALPHABET             : 21
+ASIGNACION           : 16 21 22 23 24 25 26 27 28 29 30 37 38
+AUTOMATON            : 3
+BLANK                : 29 30
+COMA                 : 36 48
 COMENTARIO_BLOQUE    : 
 COMENTARIO_LINEA     : 
-CORCHETE_A           : 
-CORCHETE_B           : 
-DFA                  : 
-EPSILON              : 
-IDENTIFICADOR        : 
-INITIAL              : 
-INPUT                : 
-LEFT                 : 
-LLAVE_A              : 2
-LLAVE_C              : 2
+CORCHETE_A           : 34
+CORCHETE_B           : 34
+DFA                  : 17
+EPSILON              : 40
+IDENTIFICADOR        : 3 23 27 30 34 34 37 41 50
+INITIAL              : 23
+INPUT                : 38
+LEFT                 : 42
+LLAVE_A              : 3 31 45 46
+LLAVE_C              : 3 31 45 46
 MOVE                 : 
-NFA                  : 
-PDA                  : 
+NFA                  : 18
+PDA                  : 19
 POP                  : 
-PUNTOCOMA            : 7 9 33 33
+PUNTOCOMA            : 16 21 22 23 24 25 26 27 28 29 30 34
 PUSH                 : 
 READ                 : 
-RIGHT                : 
-SIMBOLO              : 
-STACK_ALPHABET       : 
-STACK_START          : 
-STATES               : 
-STAY                 : 
-TAPE_ALPHABET        : 
-TM                   : 
-TRANSICION           : 
-TRANSITIONS          : 
-TYPE                 : 
+RIGHT                : 43
+SIMBOLO              : 26 29 39 49
+STACK_ALPHABET       : 25
+STACK_START          : 26 27
+STATES               : 22
+STAY                 : 44
+TAPE_ALPHABET        : 28
+TM                   : 20
+TRANSICION           : 34
+TRANSITIONS          : 31
+TYPE                 : 16
 WRITE                : 
 error                : 
 
 Nonterminals, with rules where they appear
 
-BEGIN                : 1
-CADENA               : 27
-DIFERENTE            : 23
-DIVISION             : 17
-ELSE                 : 31
-END                  : 1
-FOR                  : 33
-False                : 29
-ID                   : 7 8 9 34 35 37 38 39
-IF                   : 30 31
-IGUAL                : 22
-MASMAS               : 38
-MAYORIGUAL           : 21
-MAYORQUE             : 20
-MENORIGUAL           : 19
-MENORQUE             : 18
-MENOSMENOS           : 39
-MULTIPLICACION       : 16
-NUMERO               : 25
-PARENTESIS_A         : 24 30 31 32 33
-PARENTESIS_B         : 24 30 31 32 33
-REAL                 : 26
-RESTA                : 15
-SUMA                 : 14
-True                 : 28
-WHILE                : 32
-bloque_codigo        : 1 30 31 31 32 33
-bool                 : 11
-declaracion          : 3
-expresion            : 7 8 14 14 15 15 16 16 17 17 18 18 19 19 20 20 21 21 22 22 23 23 24 30 31 32 34 35 36 37
-for_actualizacion    : 33
-for_condicion        : 33
-for_init             : 33
-for_loop             : 
-int                  : 10
-lista_declaraciones  : 2 6 6
-mientras             : 5
-programa             : 0
-real                 : 13
-si                   : 4
-stg                  : 12
-tipo                 : 7 8 9 34
+accept_def           : 11
+alphabet_def         : 8
+atributo             : 35 36
+atributos            : 34 36
+automata_def         : 1 2
+blank_def            : 15
+conjunto_ids         : 22 24
+conjunto_simbolos    : 21 25 28
+definicion_automa    : 3
+elemento             : 47 48
+elementos_conjunto   : 45 46 48
+initial_def          : 10
+lista_transiciones   : 31 33
+programa             : 2 0
+propiedad            : 5 6
+propiedades          : 4 6
+stack_alphabet_def   : 12
+stack_start_def      : 13
+states_def           : 9
+tape_alphabet_def    : 14
+tipo_automa          : 16
+transicion_def       : 32 33
+transiciones_def     : 4
+type_def             : 7
+valor                : 37 38
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . programa
+    (1) programa -> . automata_def
+    (2) programa -> . programa automata_def
+    (3) automata_def -> . AUTOMATON IDENTIFICADOR LLAVE_A definicion_automa LLAVE_C
+
+    AUTOMATON       shift and go to state 3
+
+    programa                       shift and go to state 1
+    automata_def                   shift and go to state 2
+
+state 1
+
+    (0) S' -> programa .
+    (2) programa -> programa . automata_def
+    (3) automata_def -> . AUTOMATON IDENTIFICADOR LLAVE_A definicion_automa LLAVE_C
+
+    AUTOMATON       shift and go to state 3
+
+    automata_def                   shift and go to state 4
+
+state 2
+
+    (1) programa -> automata_def .
+
+    AUTOMATON       reduce using rule 1 (programa -> automata_def .)
+    $end            reduce using rule 1 (programa -> automata_def .)
+
+
+state 3
+
+    (3) automata_def -> AUTOMATON . IDENTIFICADOR LLAVE_A definicion_automa LLAVE_C
+
+    IDENTIFICADOR   shift and go to state 5
+
+
+state 4
+
+    (2) programa -> programa automata_def .
+
+    AUTOMATON       reduce using rule 2 (programa -> programa automata_def .)
+    $end            reduce using rule 2 (programa -> programa automata_def .)
+
+
+state 5
+
+    (3) automata_def -> AUTOMATON IDENTIFICADOR . LLAVE_A definicion_automa LLAVE_C
+
+    LLAVE_A         shift and go to state 6
+
+
+state 6
+
+    (3) automata_def -> AUTOMATON IDENTIFICADOR LLAVE_A . definicion_automa LLAVE_C
+    (4) definicion_automa -> . propiedades transiciones_def
+    (5) propiedades -> . propiedad
+    (6) propiedades -> . propiedades propiedad
+    (7) propiedad -> . type_def
+    (8) propiedad -> . alphabet_def
+    (9) propiedad -> . states_def
+    (10) propiedad -> . initial_def
+    (11) propiedad -> . accept_def
+    (12) propiedad -> . stack_alphabet_def
+    (13) propiedad -> . stack_start_def
+    (14) propiedad -> . tape_alphabet_def
+    (15) propiedad -> . blank_def
+    (16) type_def -> . TYPE ASIGNACION tipo_automa PUNTOCOMA
+    (21) alphabet_def -> . ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+    (22) states_def -> . STATES ASIGNACION conjunto_ids PUNTOCOMA
+    (23) initial_def -> . INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA
+    (24) accept_def -> . ACCEPT ASIGNACION conjunto_ids PUNTOCOMA
+    (25) stack_alphabet_def -> . STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+    (26) stack_start_def -> . STACK_START ASIGNACION SIMBOLO PUNTOCOMA
+    (27) stack_start_def -> . STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA
+    (28) tape_alphabet_def -> . TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+    (29) blank_def -> . BLANK ASIGNACION SIMBOLO PUNTOCOMA
+    (30) blank_def -> . BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA
+
+    TYPE            shift and go to state 19
+    ALPHABET        shift and go to state 20
+    STATES          shift and go to state 21
+    INITIAL         shift and go to state 22
+    ACCEPT          shift and go to state 23
+    STACK_ALPHABET  shift and go to state 24
+    STACK_START     shift and go to state 25
+    TAPE_ALPHABET   shift and go to state 26
+    BLANK           shift and go to state 27
+
+    definicion_automa              shift and go to state 7
+    propiedades                    shift and go to state 8
+    propiedad                      shift and go to state 9
+    type_def                       shift and go to state 10
+    alphabet_def                   shift and go to state 11
+    states_def                     shift and go to state 12
+    initial_def                    shift and go to state 13
+    accept_def                     shift and go to state 14
+    stack_alphabet_def             shift and go to state 15
+    stack_start_def                shift and go to state 16
+    tape_alphabet_def              shift and go to state 17
+    blank_def                      shift and go to state 18
+
+state 7
+
+    (3) automata_def -> AUTOMATON IDENTIFICADOR LLAVE_A definicion_automa . LLAVE_C
+
+    LLAVE_C         shift and go to state 28
+
+
+state 8
+
+    (4) definicion_automa -> propiedades . transiciones_def
+    (6) propiedades -> propiedades . propiedad
+    (31) transiciones_def -> . TRANSITIONS LLAVE_A lista_transiciones LLAVE_C
+    (7) propiedad -> . type_def
+    (8) propiedad -> . alphabet_def
+    (9) propiedad -> . states_def
+    (10) propiedad -> . initial_def
+    (11) propiedad -> . accept_def
+    (12) propiedad -> . stack_alphabet_def
+    (13) propiedad -> . stack_start_def
+    (14) propiedad -> . tape_alphabet_def
+    (15) propiedad -> . blank_def
+    (16) type_def -> . TYPE ASIGNACION tipo_automa PUNTOCOMA
+    (21) alphabet_def -> . ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+    (22) states_def -> . STATES ASIGNACION conjunto_ids PUNTOCOMA
+    (23) initial_def -> . INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA
+    (24) accept_def -> . ACCEPT ASIGNACION conjunto_ids PUNTOCOMA
+    (25) stack_alphabet_def -> . STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+    (26) stack_start_def -> . STACK_START ASIGNACION SIMBOLO PUNTOCOMA
+    (27) stack_start_def -> . STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA
+    (28) tape_alphabet_def -> . TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA
+    (29) blank_def -> . BLANK ASIGNACION SIMBOLO PUNTOCOMA
+    (30) blank_def -> . BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA
+
+    TRANSITIONS     shift and go to state 31
+    TYPE            shift and go to state 19
+    ALPHABET        shift and go to state 20
+    STATES          shift and go to state 21
+    INITIAL         shift and go to state 22
+    ACCEPT          shift and go to state 23
+    STACK_ALPHABET  shift and go to state 24
+    STACK_START     shift and go to state 25
+    TAPE_ALPHABET   shift and go to state 26
+    BLANK           shift and go to state 27
+
+    transiciones_def               shift and go to state 29
+    propiedad                      shift and go to state 30
+    type_def                       shift and go to state 10
+    alphabet_def                   shift and go to state 11
+    states_def                     shift and go to state 12
+    initial_def                    shift and go to state 13
+    accept_def                     shift and go to state 14
+    stack_alphabet_def             shift and go to state 15
+    stack_start_def                shift and go to state 16
+    tape_alphabet_def              shift and go to state 17
+    blank_def                      shift and go to state 18
+
+state 9
+
+    (5) propiedades -> propiedad .
+
+    TRANSITIONS     reduce using rule 5 (propiedades -> propiedad .)
+    TYPE            reduce using rule 5 (propiedades -> propiedad .)
+    ALPHABET        reduce using rule 5 (propiedades -> propiedad .)
+    STATES          reduce using rule 5 (propiedades -> propiedad .)
+    INITIAL         reduce using rule 5 (propiedades -> propiedad .)
+    ACCEPT          reduce using rule 5 (propiedades -> propiedad .)
+    STACK_ALPHABET  reduce using rule 5 (propiedades -> propiedad .)
+    STACK_START     reduce using rule 5 (propiedades -> propiedad .)
+    TAPE_ALPHABET   reduce using rule 5 (propiedades -> propiedad .)
+    BLANK           reduce using rule 5 (propiedades -> propiedad .)
+
+
+state 10
+
+    (7) propiedad -> type_def .
+
+    TRANSITIONS     reduce using rule 7 (propiedad -> type_def .)
+    TYPE            reduce using rule 7 (propiedad -> type_def .)
+    ALPHABET        reduce using rule 7 (propiedad -> type_def .)
+    STATES          reduce using rule 7 (propiedad -> type_def .)
+    INITIAL         reduce using rule 7 (propiedad -> type_def .)
+    ACCEPT          reduce using rule 7 (propiedad -> type_def .)
+    STACK_ALPHABET  reduce using rule 7 (propiedad -> type_def .)
+    STACK_START     reduce using rule 7 (propiedad -> type_def .)
+    TAPE_ALPHABET   reduce using rule 7 (propiedad -> type_def .)
+    BLANK           reduce using rule 7 (propiedad -> type_def .)
+
+
+state 11
+
+    (8) propiedad -> alphabet_def .
+
+    TRANSITIONS     reduce using rule 8 (propiedad -> alphabet_def .)
+    TYPE            reduce using rule 8 (propiedad -> alphabet_def .)
+    ALPHABET        reduce using rule 8 (propiedad -> alphabet_def .)
+    STATES          reduce using rule 8 (propiedad -> alphabet_def .)
+    INITIAL         reduce using rule 8 (propiedad -> alphabet_def .)
+    ACCEPT          reduce using rule 8 (propiedad -> alphabet_def .)
+    STACK_ALPHABET  reduce using rule 8 (propiedad -> alphabet_def .)
+    STACK_START     reduce using rule 8 (propiedad -> alphabet_def .)
+    TAPE_ALPHABET   reduce using rule 8 (propiedad -> alphabet_def .)
+    BLANK           reduce using rule 8 (propiedad -> alphabet_def .)
+
+
+state 12
+
+    (9) propiedad -> states_def .
+
+    TRANSITIONS     reduce using rule 9 (propiedad -> states_def .)
+    TYPE            reduce using rule 9 (propiedad -> states_def .)
+    ALPHABET        reduce using rule 9 (propiedad -> states_def .)
+    STATES          reduce using rule 9 (propiedad -> states_def .)
+    INITIAL         reduce using rule 9 (propiedad -> states_def .)
+    ACCEPT          reduce using rule 9 (propiedad -> states_def .)
+    STACK_ALPHABET  reduce using rule 9 (propiedad -> states_def .)
+    STACK_START     reduce using rule 9 (propiedad -> states_def .)
+    TAPE_ALPHABET   reduce using rule 9 (propiedad -> states_def .)
+    BLANK           reduce using rule 9 (propiedad -> states_def .)
+
+
+state 13
+
+    (10) propiedad -> initial_def .
+
+    TRANSITIONS     reduce using rule 10 (propiedad -> initial_def .)
+    TYPE            reduce using rule 10 (propiedad -> initial_def .)
+    ALPHABET        reduce using rule 10 (propiedad -> initial_def .)
+    STATES          reduce using rule 10 (propiedad -> initial_def .)
+    INITIAL         reduce using rule 10 (propiedad -> initial_def .)
+    ACCEPT          reduce using rule 10 (propiedad -> initial_def .)
+    STACK_ALPHABET  reduce using rule 10 (propiedad -> initial_def .)
+    STACK_START     reduce using rule 10 (propiedad -> initial_def .)
+    TAPE_ALPHABET   reduce using rule 10 (propiedad -> initial_def .)
+    BLANK           reduce using rule 10 (propiedad -> initial_def .)
+
+
+state 14
+
+    (11) propiedad -> accept_def .
+
+    TRANSITIONS     reduce using rule 11 (propiedad -> accept_def .)
+    TYPE            reduce using rule 11 (propiedad -> accept_def .)
+    ALPHABET        reduce using rule 11 (propiedad -> accept_def .)
+    STATES          reduce using rule 11 (propiedad -> accept_def .)
+    INITIAL         reduce using rule 11 (propiedad -> accept_def .)
+    ACCEPT          reduce using rule 11 (propiedad -> accept_def .)
+    STACK_ALPHABET  reduce using rule 11 (propiedad -> accept_def .)
+    STACK_START     reduce using rule 11 (propiedad -> accept_def .)
+    TAPE_ALPHABET   reduce using rule 11 (propiedad -> accept_def .)
+    BLANK           reduce using rule 11 (propiedad -> accept_def .)
+
+
+state 15
+
+    (12) propiedad -> stack_alphabet_def .
+
+    TRANSITIONS     reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    TYPE            reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    ALPHABET        reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    STATES          reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    INITIAL         reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    ACCEPT          reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    STACK_ALPHABET  reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    STACK_START     reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    TAPE_ALPHABET   reduce using rule 12 (propiedad -> stack_alphabet_def .)
+    BLANK           reduce using rule 12 (propiedad -> stack_alphabet_def .)
+
+
+state 16
+
+    (13) propiedad -> stack_start_def .
+
+    TRANSITIONS     reduce using rule 13 (propiedad -> stack_start_def .)
+    TYPE            reduce using rule 13 (propiedad -> stack_start_def .)
+    ALPHABET        reduce using rule 13 (propiedad -> stack_start_def .)
+    STATES          reduce using rule 13 (propiedad -> stack_start_def .)
+    INITIAL         reduce using rule 13 (propiedad -> stack_start_def .)
+    ACCEPT          reduce using rule 13 (propiedad -> stack_start_def .)
+    STACK_ALPHABET  reduce using rule 13 (propiedad -> stack_start_def .)
+    STACK_START     reduce using rule 13 (propiedad -> stack_start_def .)
+    TAPE_ALPHABET   reduce using rule 13 (propiedad -> stack_start_def .)
+    BLANK           reduce using rule 13 (propiedad -> stack_start_def .)
+
+
+state 17
+
+    (14) propiedad -> tape_alphabet_def .
+
+    TRANSITIONS     reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    TYPE            reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    ALPHABET        reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    STATES          reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    INITIAL         reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    ACCEPT          reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    STACK_ALPHABET  reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    STACK_START     reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    TAPE_ALPHABET   reduce using rule 14 (propiedad -> tape_alphabet_def .)
+    BLANK           reduce using rule 14 (propiedad -> tape_alphabet_def .)
+
+
+state 18
+
+    (15) propiedad -> blank_def .
+
+    TRANSITIONS     reduce using rule 15 (propiedad -> blank_def .)
+    TYPE            reduce using rule 15 (propiedad -> blank_def .)
+    ALPHABET        reduce using rule 15 (propiedad -> blank_def .)
+    STATES          reduce using rule 15 (propiedad -> blank_def .)
+    INITIAL         reduce using rule 15 (propiedad -> blank_def .)
+    ACCEPT          reduce using rule 15 (propiedad -> blank_def .)
+    STACK_ALPHABET  reduce using rule 15 (propiedad -> blank_def .)
+    STACK_START     reduce using rule 15 (propiedad -> blank_def .)
+    TAPE_ALPHABET   reduce using rule 15 (propiedad -> blank_def .)
+    BLANK           reduce using rule 15 (propiedad -> blank_def .)
+
+
+state 19
+
+    (16) type_def -> TYPE . ASIGNACION tipo_automa PUNTOCOMA
+
+    ASIGNACION      shift and go to state 32
+
+
+state 20
+
+    (21) alphabet_def -> ALPHABET . ASIGNACION conjunto_simbolos PUNTOCOMA
+
+    ASIGNACION      shift and go to state 33
+
+
+state 21
+
+    (22) states_def -> STATES . ASIGNACION conjunto_ids PUNTOCOMA
+
+    ASIGNACION      shift and go to state 34
+
+
+state 22
+
+    (23) initial_def -> INITIAL . ASIGNACION IDENTIFICADOR PUNTOCOMA
+
+    ASIGNACION      shift and go to state 35
+
+
+state 23
+
+    (24) accept_def -> ACCEPT . ASIGNACION conjunto_ids PUNTOCOMA
+
+    ASIGNACION      shift and go to state 36
+
+
+state 24
+
+    (25) stack_alphabet_def -> STACK_ALPHABET . ASIGNACION conjunto_simbolos PUNTOCOMA
+
+    ASIGNACION      shift and go to state 37
+
+
+state 25
+
+    (26) stack_start_def -> STACK_START . ASIGNACION SIMBOLO PUNTOCOMA
+    (27) stack_start_def -> STACK_START . ASIGNACION IDENTIFICADOR PUNTOCOMA
+
+    ASIGNACION      shift and go to state 38
+
+
+state 26
+
+    (28) tape_alphabet_def -> TAPE_ALPHABET . ASIGNACION conjunto_simbolos PUNTOCOMA
+
+    ASIGNACION      shift and go to state 39
+
+
+state 27
+
+    (29) blank_def -> BLANK . ASIGNACION SIMBOLO PUNTOCOMA
+    (30) blank_def -> BLANK . ASIGNACION IDENTIFICADOR PUNTOCOMA
+
+    ASIGNACION      shift and go to state 40
+
+
+state 28
+
+    (3) automata_def -> AUTOMATON IDENTIFICADOR LLAVE_A definicion_automa LLAVE_C .
+
+    AUTOMATON       reduce using rule 3 (automata_def -> AUTOMATON IDENTIFICADOR LLAVE_A definicion_automa LLAVE_C .)
+    $end            reduce using rule 3 (automata_def -> AUTOMATON IDENTIFICADOR LLAVE_A definicion_automa LLAVE_C .)
+
+
+state 29
+
+    (4) definicion_automa -> propiedades transiciones_def .
+
+    LLAVE_C         reduce using rule 4 (definicion_automa -> propiedades transiciones_def .)
+
+
+state 30
+
+    (6) propiedades -> propiedades propiedad .
+
+    TRANSITIONS     reduce using rule 6 (propiedades -> propiedades propiedad .)
+    TYPE            reduce using rule 6 (propiedades -> propiedades propiedad .)
+    ALPHABET        reduce using rule 6 (propiedades -> propiedades propiedad .)
+    STATES          reduce using rule 6 (propiedades -> propiedades propiedad .)
+    INITIAL         reduce using rule 6 (propiedades -> propiedades propiedad .)
+    ACCEPT          reduce using rule 6 (propiedades -> propiedades propiedad .)
+    STACK_ALPHABET  reduce using rule 6 (propiedades -> propiedades propiedad .)
+    STACK_START     reduce using rule 6 (propiedades -> propiedades propiedad .)
+    TAPE_ALPHABET   reduce using rule 6 (propiedades -> propiedades propiedad .)
+    BLANK           reduce using rule 6 (propiedades -> propiedades propiedad .)
+
+
+state 31
+
+    (31) transiciones_def -> TRANSITIONS . LLAVE_A lista_transiciones LLAVE_C
+
+    LLAVE_A         shift and go to state 41
+
+
+state 32
+
+    (16) type_def -> TYPE ASIGNACION . tipo_automa PUNTOCOMA
+    (17) tipo_automa -> . DFA
+    (18) tipo_automa -> . NFA
+    (19) tipo_automa -> . PDA
+    (20) tipo_automa -> . TM
+
+    DFA             shift and go to state 43
+    NFA             shift and go to state 44
+    PDA             shift and go to state 45
+    TM              shift and go to state 46
+
+    tipo_automa                    shift and go to state 42
+
+state 33
+
+    (21) alphabet_def -> ALPHABET ASIGNACION . conjunto_simbolos PUNTOCOMA
+    (45) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
+
+    LLAVE_A         shift and go to state 48
+
+    conjunto_simbolos              shift and go to state 47
+
+state 34
+
+    (22) states_def -> STATES ASIGNACION . conjunto_ids PUNTOCOMA
+    (46) conjunto_ids -> . LLAVE_A elementos_conjunto LLAVE_C
+
+    LLAVE_A         shift and go to state 50
+
+    conjunto_ids                   shift and go to state 49
+
+state 35
+
+    (23) initial_def -> INITIAL ASIGNACION . IDENTIFICADOR PUNTOCOMA
+
+    IDENTIFICADOR   shift and go to state 51
+
+
+state 36
+
+    (24) accept_def -> ACCEPT ASIGNACION . conjunto_ids PUNTOCOMA
+    (46) conjunto_ids -> . LLAVE_A elementos_conjunto LLAVE_C
+
+    LLAVE_A         shift and go to state 50
+
+    conjunto_ids                   shift and go to state 52
+
+state 37
+
+    (25) stack_alphabet_def -> STACK_ALPHABET ASIGNACION . conjunto_simbolos PUNTOCOMA
+    (45) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
+
+    LLAVE_A         shift and go to state 48
+
+    conjunto_simbolos              shift and go to state 53
+
+state 38
+
+    (26) stack_start_def -> STACK_START ASIGNACION . SIMBOLO PUNTOCOMA
+    (27) stack_start_def -> STACK_START ASIGNACION . IDENTIFICADOR PUNTOCOMA
+
+    SIMBOLO         shift and go to state 54
+    IDENTIFICADOR   shift and go to state 55
+
+
+state 39
+
+    (28) tape_alphabet_def -> TAPE_ALPHABET ASIGNACION . conjunto_simbolos PUNTOCOMA
+    (45) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
+
+    LLAVE_A         shift and go to state 48
+
+    conjunto_simbolos              shift and go to state 56
+
+state 40
+
+    (29) blank_def -> BLANK ASIGNACION . SIMBOLO PUNTOCOMA
+    (30) blank_def -> BLANK ASIGNACION . IDENTIFICADOR PUNTOCOMA
+
+    SIMBOLO         shift and go to state 57
+    IDENTIFICADOR   shift and go to state 58
+
+
+state 41
+
+    (31) transiciones_def -> TRANSITIONS LLAVE_A . lista_transiciones LLAVE_C
+    (32) lista_transiciones -> . transicion_def
+    (33) lista_transiciones -> . lista_transiciones transicion_def
+    (34) transicion_def -> . IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA
+
+    IDENTIFICADOR   shift and go to state 61
+
+    lista_transiciones             shift and go to state 59
+    transicion_def                 shift and go to state 60
+
+state 42
+
+    (16) type_def -> TYPE ASIGNACION tipo_automa . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 62
+
+
+state 43
+
+    (17) tipo_automa -> DFA .
+
+    PUNTOCOMA       reduce using rule 17 (tipo_automa -> DFA .)
+
+
+state 44
+
+    (18) tipo_automa -> NFA .
+
+    PUNTOCOMA       reduce using rule 18 (tipo_automa -> NFA .)
+
+
+state 45
+
+    (19) tipo_automa -> PDA .
+
+    PUNTOCOMA       reduce using rule 19 (tipo_automa -> PDA .)
+
+
+state 46
+
+    (20) tipo_automa -> TM .
+
+    PUNTOCOMA       reduce using rule 20 (tipo_automa -> TM .)
+
+
+state 47
+
+    (21) alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 63
+
+
+state 48
+
+    (45) conjunto_simbolos -> LLAVE_A . elementos_conjunto LLAVE_C
+    (47) elementos_conjunto -> . elemento
+    (48) elementos_conjunto -> . elementos_conjunto COMA elemento
+    (49) elemento -> . SIMBOLO
+    (50) elemento -> . IDENTIFICADOR
+
+    SIMBOLO         shift and go to state 66
+    IDENTIFICADOR   shift and go to state 67
+
+    elementos_conjunto             shift and go to state 64
+    elemento                       shift and go to state 65
+
+state 49
+
+    (22) states_def -> STATES ASIGNACION conjunto_ids . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 68
+
+
+state 50
+
+    (46) conjunto_ids -> LLAVE_A . elementos_conjunto LLAVE_C
+    (47) elementos_conjunto -> . elemento
+    (48) elementos_conjunto -> . elementos_conjunto COMA elemento
+    (49) elemento -> . SIMBOLO
+    (50) elemento -> . IDENTIFICADOR
+
+    SIMBOLO         shift and go to state 66
+    IDENTIFICADOR   shift and go to state 67
+
+    elementos_conjunto             shift and go to state 69
+    elemento                       shift and go to state 65
+
+state 51
+
+    (23) initial_def -> INITIAL ASIGNACION IDENTIFICADOR . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 70
+
+
+state 52
+
+    (24) accept_def -> ACCEPT ASIGNACION conjunto_ids . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 71
+
+
+state 53
+
+    (25) stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 72
+
+
+state 54
+
+    (26) stack_start_def -> STACK_START ASIGNACION SIMBOLO . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 73
+
+
+state 55
+
+    (27) stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 74
+
+
+state 56
+
+    (28) tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 75
+
+
+state 57
+
+    (29) blank_def -> BLANK ASIGNACION SIMBOLO . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 76
+
+
+state 58
+
+    (30) blank_def -> BLANK ASIGNACION IDENTIFICADOR . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 77
+
+
+state 59
+
+    (31) transiciones_def -> TRANSITIONS LLAVE_A lista_transiciones . LLAVE_C
+    (33) lista_transiciones -> lista_transiciones . transicion_def
+    (34) transicion_def -> . IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA
+
+    LLAVE_C         shift and go to state 78
+    IDENTIFICADOR   shift and go to state 61
+
+    transicion_def                 shift and go to state 79
+
+state 60
+
+    (32) lista_transiciones -> transicion_def .
+
+    LLAVE_C         reduce using rule 32 (lista_transiciones -> transicion_def .)
+    IDENTIFICADOR   reduce using rule 32 (lista_transiciones -> transicion_def .)
+
+
+state 61
+
+    (34) transicion_def -> IDENTIFICADOR . TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA
+
+    TRANSICION      shift and go to state 80
+
+
+state 62
+
+    (16) type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    TYPE            reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    ALPHABET        reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    STATES          reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    INITIAL         reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    ACCEPT          reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    STACK_START     reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+    BLANK           reduce using rule 16 (type_def -> TYPE ASIGNACION tipo_automa PUNTOCOMA .)
+
+
+state 63
+
+    (21) alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    TYPE            reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    ALPHABET        reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STATES          reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    INITIAL         reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    ACCEPT          reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STACK_START     reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    BLANK           reduce using rule 21 (alphabet_def -> ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+
+
+state 64
+
+    (45) conjunto_simbolos -> LLAVE_A elementos_conjunto . LLAVE_C
+    (48) elementos_conjunto -> elementos_conjunto . COMA elemento
+
+    LLAVE_C         shift and go to state 81
+    COMA            shift and go to state 82
+
+
+state 65
+
+    (47) elementos_conjunto -> elemento .
+
+    LLAVE_C         reduce using rule 47 (elementos_conjunto -> elemento .)
+    COMA            reduce using rule 47 (elementos_conjunto -> elemento .)
+
+
+state 66
+
+    (49) elemento -> SIMBOLO .
+
+    LLAVE_C         reduce using rule 49 (elemento -> SIMBOLO .)
+    COMA            reduce using rule 49 (elemento -> SIMBOLO .)
+
+
+state 67
+
+    (50) elemento -> IDENTIFICADOR .
+
+    LLAVE_C         reduce using rule 50 (elemento -> IDENTIFICADOR .)
+    COMA            reduce using rule 50 (elemento -> IDENTIFICADOR .)
+
+
+state 68
+
+    (22) states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    TYPE            reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    ALPHABET        reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    STATES          reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    INITIAL         reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    ACCEPT          reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    STACK_START     reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+    BLANK           reduce using rule 22 (states_def -> STATES ASIGNACION conjunto_ids PUNTOCOMA .)
+
+
+state 69
+
+    (46) conjunto_ids -> LLAVE_A elementos_conjunto . LLAVE_C
+    (48) elementos_conjunto -> elementos_conjunto . COMA elemento
+
+    LLAVE_C         shift and go to state 83
+    COMA            shift and go to state 82
+
+
+state 70
+
+    (23) initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    TYPE            reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    ALPHABET        reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STATES          reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    INITIAL         reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    ACCEPT          reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STACK_START     reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    BLANK           reduce using rule 23 (initial_def -> INITIAL ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+
+
+state 71
+
+    (24) accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    TYPE            reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    ALPHABET        reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    STATES          reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    INITIAL         reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    ACCEPT          reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    STACK_START     reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+    BLANK           reduce using rule 24 (accept_def -> ACCEPT ASIGNACION conjunto_ids PUNTOCOMA .)
+
+
+state 72
+
+    (25) stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    TYPE            reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    ALPHABET        reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STATES          reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    INITIAL         reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    ACCEPT          reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STACK_START     reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    BLANK           reduce using rule 25 (stack_alphabet_def -> STACK_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+
+
+state 73
+
+    (26) stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    TYPE            reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    ALPHABET        reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    STATES          reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    INITIAL         reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    ACCEPT          reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    STACK_START     reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+    BLANK           reduce using rule 26 (stack_start_def -> STACK_START ASIGNACION SIMBOLO PUNTOCOMA .)
+
+
+state 74
+
+    (27) stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    TYPE            reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    ALPHABET        reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STATES          reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    INITIAL         reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    ACCEPT          reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STACK_START     reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    BLANK           reduce using rule 27 (stack_start_def -> STACK_START ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+
+
+state 75
+
+    (28) tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    TYPE            reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    ALPHABET        reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STATES          reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    INITIAL         reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    ACCEPT          reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    STACK_START     reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+    BLANK           reduce using rule 28 (tape_alphabet_def -> TAPE_ALPHABET ASIGNACION conjunto_simbolos PUNTOCOMA .)
+
+
+state 76
+
+    (29) blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    TYPE            reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    ALPHABET        reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    STATES          reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    INITIAL         reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    ACCEPT          reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    STACK_START     reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+    BLANK           reduce using rule 29 (blank_def -> BLANK ASIGNACION SIMBOLO PUNTOCOMA .)
+
+
+state 77
+
+    (30) blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .
+
+    TRANSITIONS     reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    TYPE            reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    ALPHABET        reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STATES          reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    INITIAL         reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    ACCEPT          reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STACK_ALPHABET  reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    STACK_START     reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    TAPE_ALPHABET   reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+    BLANK           reduce using rule 30 (blank_def -> BLANK ASIGNACION IDENTIFICADOR PUNTOCOMA .)
+
+
+state 78
+
+    (31) transiciones_def -> TRANSITIONS LLAVE_A lista_transiciones LLAVE_C .
+
+    LLAVE_C         reduce using rule 31 (transiciones_def -> TRANSITIONS LLAVE_A lista_transiciones LLAVE_C .)
+
+
+state 79
+
+    (33) lista_transiciones -> lista_transiciones transicion_def .
+
+    LLAVE_C         reduce using rule 33 (lista_transiciones -> lista_transiciones transicion_def .)
+    IDENTIFICADOR   reduce using rule 33 (lista_transiciones -> lista_transiciones transicion_def .)
+
+
+state 80
+
+    (34) transicion_def -> IDENTIFICADOR TRANSICION . IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA
+
+    IDENTIFICADOR   shift and go to state 84
+
+
+state 81
+
+    (45) conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C .
+
+    PUNTOCOMA       reduce using rule 45 (conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C .)
+
+
+state 82
+
+    (48) elementos_conjunto -> elementos_conjunto COMA . elemento
+    (49) elemento -> . SIMBOLO
+    (50) elemento -> . IDENTIFICADOR
+
+    SIMBOLO         shift and go to state 66
+    IDENTIFICADOR   shift and go to state 67
+
+    elemento                       shift and go to state 85
+
+state 83
+
+    (46) conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C .
+
+    PUNTOCOMA       reduce using rule 46 (conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C .)
+
+
+state 84
+
+    (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR . CORCHETE_A atributos CORCHETE_B PUNTOCOMA
+
+    CORCHETE_A      shift and go to state 86
+
+
+state 85
+
+    (48) elementos_conjunto -> elementos_conjunto COMA elemento .
+
+    LLAVE_C         reduce using rule 48 (elementos_conjunto -> elementos_conjunto COMA elemento .)
+    COMA            reduce using rule 48 (elementos_conjunto -> elementos_conjunto COMA elemento .)
+
+
+state 86
+
+    (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A . atributos CORCHETE_B PUNTOCOMA
+    (35) atributos -> . atributo
+    (36) atributos -> . atributos COMA atributo
+    (37) atributo -> . IDENTIFICADOR ASIGNACION valor
+    (38) atributo -> . INPUT ASIGNACION valor
+
+    IDENTIFICADOR   shift and go to state 87
+    INPUT           shift and go to state 90
+
+    atributos                      shift and go to state 88
+    atributo                       shift and go to state 89
+
+state 87
+
+    (37) atributo -> IDENTIFICADOR . ASIGNACION valor
+
+    ASIGNACION      shift and go to state 91
+
+
+state 88
+
+    (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos . CORCHETE_B PUNTOCOMA
+    (36) atributos -> atributos . COMA atributo
+
+    CORCHETE_B      shift and go to state 92
+    COMA            shift and go to state 93
+
+
+state 89
+
+    (35) atributos -> atributo .
+
+    CORCHETE_B      reduce using rule 35 (atributos -> atributo .)
+    COMA            reduce using rule 35 (atributos -> atributo .)
+
+
+state 90
+
+    (38) atributo -> INPUT . ASIGNACION valor
+
+    ASIGNACION      shift and go to state 94
+
+
+state 91
+
+    (37) atributo -> IDENTIFICADOR ASIGNACION . valor
+    (39) valor -> . SIMBOLO
+    (40) valor -> . EPSILON
+    (41) valor -> . IDENTIFICADOR
+    (42) valor -> . LEFT
+    (43) valor -> . RIGHT
+    (44) valor -> . STAY
+
+    SIMBOLO         shift and go to state 97
+    EPSILON         shift and go to state 98
+    IDENTIFICADOR   shift and go to state 95
+    LEFT            shift and go to state 99
+    RIGHT           shift and go to state 100
+    STAY            shift and go to state 101
+
+    valor                          shift and go to state 96
+
+state 92
+
+    (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 102
+
+
+state 93
+
+    (36) atributos -> atributos COMA . atributo
+    (37) atributo -> . IDENTIFICADOR ASIGNACION valor
+    (38) atributo -> . INPUT ASIGNACION valor
+
+    IDENTIFICADOR   shift and go to state 87
+    INPUT           shift and go to state 90
+
+    atributo                       shift and go to state 103
+
+state 94
+
+    (38) atributo -> INPUT ASIGNACION . valor
+    (39) valor -> . SIMBOLO
+    (40) valor -> . EPSILON
+    (41) valor -> . IDENTIFICADOR
+    (42) valor -> . LEFT
+    (43) valor -> . RIGHT
+    (44) valor -> . STAY
+
+    SIMBOLO         shift and go to state 97
+    EPSILON         shift and go to state 98
+    IDENTIFICADOR   shift and go to state 95
+    LEFT            shift and go to state 99
+    RIGHT           shift and go to state 100
+    STAY            shift and go to state 101
+
+    valor                          shift and go to state 104
+
+state 95
+
+    (41) valor -> IDENTIFICADOR .
+
+    CORCHETE_B      reduce using rule 41 (valor -> IDENTIFICADOR .)
+    COMA            reduce using rule 41 (valor -> IDENTIFICADOR .)
+
+
+state 96
+
+    (37) atributo -> IDENTIFICADOR ASIGNACION valor .
+
+    CORCHETE_B      reduce using rule 37 (atributo -> IDENTIFICADOR ASIGNACION valor .)
+    COMA            reduce using rule 37 (atributo -> IDENTIFICADOR ASIGNACION valor .)
+
+
+state 97
+
+    (39) valor -> SIMBOLO .
+
+    CORCHETE_B      reduce using rule 39 (valor -> SIMBOLO .)
+    COMA            reduce using rule 39 (valor -> SIMBOLO .)
+
+
+state 98
+
+    (40) valor -> EPSILON .
+
+    CORCHETE_B      reduce using rule 40 (valor -> EPSILON .)
+    COMA            reduce using rule 40 (valor -> EPSILON .)
+
+
+state 99
+
+    (42) valor -> LEFT .
+
+    CORCHETE_B      reduce using rule 42 (valor -> LEFT .)
+    COMA            reduce using rule 42 (valor -> LEFT .)
+
+
+state 100
+
+    (43) valor -> RIGHT .
+
+    CORCHETE_B      reduce using rule 43 (valor -> RIGHT .)
+    COMA            reduce using rule 43 (valor -> RIGHT .)
+
+
+state 101
+
+    (44) valor -> STAY .
+
+    CORCHETE_B      reduce using rule 44 (valor -> STAY .)
+    COMA            reduce using rule 44 (valor -> STAY .)
+
+
+state 102
+
+    (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA .
+
+    LLAVE_C         reduce using rule 34 (transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA .)
+    IDENTIFICADOR   reduce using rule 34 (transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA .)
+
+
+state 103
+
+    (36) atributos -> atributos COMA atributo .
+
+    CORCHETE_B      reduce using rule 36 (atributos -> atributos COMA atributo .)
+    COMA            reduce using rule 36 (atributos -> atributos COMA atributo .)
+
+
+state 104
+
+    (38) atributo -> INPUT ASIGNACION valor .
+
+    CORCHETE_B      reduce using rule 38 (atributo -> INPUT ASIGNACION valor .)
+    COMA            reduce using rule 38 (atributo -> INPUT ASIGNACION valor .)
 

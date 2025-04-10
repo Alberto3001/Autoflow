@@ -65,7 +65,7 @@ class Compilador(Tk):
         super().__init__()
         self.centrar_ventana(800, 600)
         limpiar_errores_lex()
-        self.title("Compilador LAUSTISC")
+        self.title("IDE AutoFLow")
         self.create_widgets()
         self.filename = None  # Variable para almacenar el nombre del archivo actual
 
