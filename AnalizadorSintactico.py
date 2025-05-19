@@ -1,7 +1,8 @@
 # Importar módulo yacc
 import ply.yacc as yacc
+import ply.lex as lex
 # Importar tokens del analizador léxico
-from AnalizadorLexico import tokens
+from AnalizadorLexico import tokens, lexer as al_lexer_instance
 
 errores_Sinc_Desc = []
 
@@ -233,15 +234,31 @@ def p_elemento(p):
 # Manejo de errores sintácticos
 def p_error(p):
     if p:
-        errores_Sinc_Desc.append(f"Error de sintaxis en '{p.value}' en la línea {p.lineno}")
+        input_text = p.lexer.lexdata
+        line_start_pos = input_text.rfind('\n', 0, p.lexpos) + 1
+        columna = (p.lexpos - line_start_pos) + 1
+        error_info = {
+            'message': f"Error de sintaxis en '{p.value}' en la línea {p.lineno}, columna {columna}",
+            'line': p.lineno,
+            'col': columna,
+            'value': p.value 
+        }
+        errores_Sinc_Desc.append(error_info)
     else:
-        errores_Sinc_Desc.append("Error de sintaxis al final del archivo")
+        error_info = {
+            'message': "Error de sintaxis al final del archivo (ubicación no detallada)",
+            'line': -1, 
+            'col': -1,
+            'value': None
+        }
+        errores_Sinc_Desc.append(error_info)
 
 # Construir el analizador sintáctico
 parser = yacc.yacc()
 
 def test_parser(codigo):
-    result = parser.parse(codigo)
+    al_lexer_instance.lineno = 1
+    result = parser.parse(codigo, lexer=al_lexer_instance)
     return result
 
 # Ejemplo de uso
