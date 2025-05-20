@@ -240,14 +240,16 @@ def p_error(p):
 # Construir el analizador sintáctico
 parser = yacc.yacc()
 
-def test_parser(codigo):
-    result = parser.parse(codigo)
+def test_parser(codigo, lexer=None):
+    if lexer is not None:
+        lexer.lineno = 1
+    result = parser.parse(codigo, lexer=lexer)
     return result
 
 # Ejemplo de uso
 if __name__ == "__main__":
     codigo = '''
-    automaton AFD_Ejemplo {
+    automato AFD_Ejemplo {
       type = DFA;
       alphabet = {a, b};
       states = {q0, q1, q2};

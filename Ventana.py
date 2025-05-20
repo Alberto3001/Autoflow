@@ -282,7 +282,10 @@ class Compilador(Tk):
         # # Análisis Sintáctico
         limpiar_errores()
         global resultadosSintactico
-        resultadosSintactico = AS.test_parser(codigo)
+        # Crear un lexer nuevo y reiniciar su línea
+        lexer = AL.lexer
+        lexer.lineno = 1
+        resultadosSintactico = AS.test_parser(codigo, lexer=lexer)
 
         # Imprimir resultados sintácticos en la consola de Python para depuración
         print("Resultado del análisis sintáctico:", resultadosSintactico)
@@ -292,10 +295,9 @@ class Compilador(Tk):
         for error in errores_Sinc_Desc:
             self.output_console.insert(END, error + "\n")
 
-        # # Mostrar los errores Semanticos en la consola de salida
-        # errores_Sem_Desc = AS.errores_Sem_Desc
-        # for error in errores_Sem_Desc:
-        #     self.output_console.insert(END, error + "\n")
+        # Mostrar el resultado del análisis sintáctico en la consola de salida
+        self.output_console.insert(END, "\nResultado del análisis sintáctico:\n")
+        self.output_console.insert(END, str(resultadosSintactico) + "\n")
 
 
 if __name__ == "__main__":
