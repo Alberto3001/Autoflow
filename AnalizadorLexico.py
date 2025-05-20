@@ -7,8 +7,7 @@ lista_errores_lexicos = []
 
 #Definir método para vaciar listas
 def limpiar_errores_lex():
-    global errores_Desc
-    global lista_errores_lexicos
+    global errores_Desc, lista_errores_lexicos
     errores_Desc = []
     lista_errores_lexicos = []
 
@@ -110,8 +109,21 @@ def t_SALTOLINEA(t):
 
 # Manejo de errores
 def t_error(t):
-    global errores_Desc
-    errores_Desc.append(f"Símbolo no válido '{t.value[0]}' en la línea {t.lineno}")
+    global errores_Desc, lista_errores_lexicos
+    col = 0
+    if t.lexer.lexdata: 
+        line_start_pos = t.lexer.lexdata.rfind('\n', 0, t.lexpos) + 1
+        col = (t.lexpos - line_start_pos) + 1
+    
+    error_info = {
+        'message': f"Símbolo no válido '{t.value[0]}' en la línea {t.lineno}, columna {col}",
+        'line': t.lineno,
+        'col': col,
+        'value': t.value[0]
+    }
+    errores_Desc.append(error_info)
+    if t.lineno not in lista_errores_lexicos: # Mantener la lógica para resaltar números de línea
+        lista_errores_lexicos.append(t.lineno)
     t.lexer.skip(1)
 
 # Construir el analizador léxico
