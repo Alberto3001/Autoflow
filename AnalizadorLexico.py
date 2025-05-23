@@ -1,5 +1,6 @@
 #Importar módulo lex
 import ply.lex as lex
+import difflib
 
 #Definir dos variables para los errores
 errores_Desc = []
@@ -94,7 +95,24 @@ def t_COMENTARIO_BLOQUE(t):
 def t_IDENTIFICADOR(t):
     r'[a-zA-Z][a-zA-Z0-9_]*'
     # Verificar si es una palabra reservada
-    t.type = palabras_reservadas.get(t.value, 'IDENTIFICADOR')
+    if t.value in palabras_reservadas:
+        t.type = palabras_reservadas[t.value]
+        return t
+    # Sugerir si es similar a una reservada
+    close = difflib.get_close_matches(t.value, palabras_reservadas.keys(), n=1, cutoff=0.8)
+    if close:
+        col = t.lexpos - t.lexer.lexdata.rfind('\n', 0, t.lexpos)
+        error_info = {
+            'message': f"¿Quizás quiso decir '{close[0]}' en vez de '{t.value}'? Palabra no reconocida.",
+            'line': t.lineno,
+            'col': col,
+            'value': t.value
+        }
+        errores_Desc.append(error_info)
+        if t.lineno not in lista_errores_lexicos:
+            lista_errores_lexicos.append(t.lineno)
+        return  # No retorna token, lo trata como error léxico
+    t.type = 'IDENTIFICADOR'
     return t
 
 # Método para símbolos (caracteres individuales o secuencias para alfabetos)
@@ -114,7 +132,7 @@ def t_error(t):
     if t.lexer.lexdata: 
         line_start_pos = t.lexer.lexdata.rfind('\n', 0, t.lexpos) + 1
         col = (t.lexpos - line_start_pos) + 1
-    
+
     error_info = {
         'message': f"Símbolo no válido '{t.value[0]}' en la línea {t.lineno}, columna {col}",
         'line': t.lineno,
@@ -122,7 +140,7 @@ def t_error(t):
         'value': t.value[0]
     }
     errores_Desc.append(error_info)
-    if t.lineno not in lista_errores_lexicos: # Mantener la lógica para resaltar números de línea
+    if t.lineno not in lista_errores_lexicos:
         lista_errores_lexicos.append(t.lineno)
     t.lexer.skip(1)
 

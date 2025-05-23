@@ -233,10 +233,15 @@ def p_elemento(p):
 # Manejo de errores sintácticos
 def p_error(p):
     if p:
-        errores_Sinc_Desc.append(f"Error de sintaxis en '{p.value}' en la línea {p.lineno}")
+        error_msg = {
+            'message': f"Error de sintaxis en '{p.value}'",
+            'line': p.lineno,
+            'col': p.lexpos if hasattr(p, 'lexpos') else None,
+            'type': 'Sintáctico'
+        }
+        errores_Sinc_Desc.append(error_msg)
     else:
-        errores_Sinc_Desc.append("Error de sintaxis al final del archivo")
-
+        errores_Sinc_Desc.append({'message': "Error de sintaxis al final del archivo", 'line': None, 'col': None, 'type': 'Sintáctico'})
 # Construir el analizador sintáctico
 parser = yacc.yacc()
 

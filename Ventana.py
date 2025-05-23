@@ -7,8 +7,8 @@ import AnalizadorLexico as AL
 from AnalizadorLexico import limpiar_errores_lex
 import AnalizadorSintactico as AS
 from AnalizadorSintactico import limpiar_errores
-
-
+import tkinter as tk
+import re
 
 resultados = []
 resultadosSintactico = [] 
@@ -134,20 +134,130 @@ class Compilador(Tk):
         self.output_console = scrolledtext.ScrolledText(self.console_frame, wrap=WORD)
         self.output_console.pack(expand=True, fill="both")
 
+        # Configurar tags ANTES de usar los eventos
+        self.configure_tags()
+
         # Asociar eventos
-        self.text_editor.bind("<KeyRelease>", self.update_line_numbers)
+        self.text_editor.bind("<KeyRelease>", self.update_line_numbers_and_highlight)
         self.text_editor.bind("<MouseWheel>", self.update_line_numbers)
         self.text_editor.bind("<Button-4>", self.update_line_numbers)
         self.text_editor.bind("<Button-5>", self.update_line_numbers)
         self.text_editor.bind("<Configure>", self.update_line_numbers)
+
+    def configure_tags(self):
+        """Configurar todos los tags de una vez"""
+        self.text_editor.tag_configure('reservadas', foreground='blue', font=('Consolas', 10, 'bold'))
+        self.text_editor.tag_configure('error_lexico', background='yellow', underline=True)
+        self.text_editor.tag_configure('tooltip', background='lightyellow')
+
+    def resaltar_palabras_reservadas(self):
+        """Versión mejorada del resaltado de palabras reservadas"""
+        # Limpia tags anteriores
+        self.text_editor.tag_remove('reservadas', '1.0', END)
+        self.text_editor.tag_remove('error_lexico', '1.0', END)
+        self.text_editor.tag_remove('tooltip', '1.0', END)
         
-        # Configuración del tag antes de usarlo
-        self.text_editor.tag_configure('reservadas', foreground='blue')
-        self.text_editor.bind("<KeyRelease>", self.update_line_numbers_and_highlight)
+        texto = self.text_editor.get('1.0', END)
+        
+        # Verificar que AL.palabras_reservadas existe y tiene contenido
+        if not hasattr(AL, 'palabras_reservadas'):
+            print("Warning: AL.palabras_reservadas no encontrado")
+            return
+            
+        palabras_reservadas = AL.palabras_reservadas
+        if not palabras_reservadas:
+            print("Warning: AL.palabras_reservadas está vacío")
+            return
+
+        print(f"Palabras reservadas encontradas: {palabras_reservadas}")  # Debug
+
+        # Método alternativo sin regex para buscar palabras reservadas
+        for palabra in palabras_reservadas:
+            # Convertir palabra a string en caso de que sea otro tipo
+            palabra_str = str(palabra).lower()
+            texto_lower = texto.lower()
+            
+            start_pos = 0
+            while True:
+                # Buscar la palabra en el texto
+                pos = texto_lower.find(palabra_str, start_pos)
+                if pos == -1:
+                    break
+                
+                # Verificar que sea una palabra completa (no parte de otra palabra)
+                es_palabra_completa = True
+                
+                # Verificar carácter anterior
+                if pos > 0:
+                    char_anterior = texto[pos - 1]
+                    if char_anterior.isalnum() or char_anterior == '_':
+                        es_palabra_completa = False
+                
+                # Verificar carácter siguiente
+                if pos + len(palabra_str) < len(texto):
+                    char_siguiente = texto[pos + len(palabra_str)]
+                    if char_siguiente.isalnum() or char_siguiente == '_':
+                        es_palabra_completa = False
+                
+                if es_palabra_completa:
+                    # Convertir posición a índice de Tkinter
+                    inicio_linea = texto[:pos].count('\n') + 1
+                    inicio_col = pos - texto[:pos].rfind('\n') - 1 if '\n' in texto[:pos] else pos
+                    
+                    inicio_idx = f"{inicio_linea}.{inicio_col}"
+                    fin_idx = f"{inicio_linea}.{inicio_col + len(palabra_str)}"
+                    
+                    # Aplicar el tag
+                    self.text_editor.tag_add('reservadas', inicio_idx, fin_idx)
+                    print(f"Resaltando '{palabra_str}' en {inicio_idx} - {fin_idx}")  # Debug
+                
+                start_pos = pos + 1
+
+        # Resaltar errores léxicos
+        if hasattr(AL, 'errores_Desc') and AL.errores_Desc:
+            for error in AL.errores_Desc:
+                if isinstance(error, dict) and 'line' in error and 'col' in error:
+                    linea = error['line']
+                    col = error['col']
+                    idx = f"{linea}.{max(0, col-1)}"
+                    end = f"{linea}.{col}"
+                    self.text_editor.tag_add('error_lexico', idx, end)
+                    
+                    # Crear tooltip para errores
+                    def crear_tooltip(mensaje):
+                        return lambda e: self.mostrar_tooltip(e, mensaje)
+                    
+                    self.text_editor.tag_bind('error_lexico', '<Enter>', crear_tooltip(error.get('message', 'Error léxico')))
+                    self.text_editor.tag_bind('error_lexico', '<Leave>', self.ocultar_tooltip)
+
+    def mostrar_tooltip(self, event, mensaje):
+        try:
+            x = event.x_root + 20
+            y = event.y_root + 10
+            if hasattr(self, 'tooltip'):
+                self.tooltip.destroy()
+            
+            self.tooltip = tk.Toplevel(self)
+            self.tooltip.wm_overrideredirect(True)
+            self.tooltip.wm_geometry(f"+{x}+{y}")
+            label = tk.Label(self.tooltip, text=mensaje, background="lightyellow", relief='solid', borderwidth=1, font=("Arial", 9))
+            label.pack()
+        except Exception as e:
+            print(f"Error mostrando tooltip: {e}")
+
+    def ocultar_tooltip(self, event):
+        try:
+            if hasattr(self, 'tooltip'):
+                self.tooltip.destroy()
+                del self.tooltip
+        except Exception as e:
+            print(f"Error ocultando tooltip: {e}")
 
     def update_line_numbers_and_highlight(self, event=None):
-        self.update_line_numbers()
-        # self.resaltar_palabras_reservadas()
+        """Actualizar números de línea y resaltado"""
+        # Usar after_idle para asegurar que se ejecute después de otras operaciones
+        self.after_idle(self.update_line_numbers)
+        self.after_idle(self.resaltar_palabras_reservadas)
 
     def nuevo_archivo(self):
         if self.text_editor.get("1.0", END).strip():
@@ -211,6 +321,8 @@ class Compilador(Tk):
         self.console_frame.config(width=30)
         self.output_console.config(height=0.1, width=1)
         
+        # Reconfigurar tags después del cambio de fuente
+        self.after_idle(self.configure_tags)
 
     def tamañoMenos(self):
          # Obtiene la fuente actual del editor de texto
@@ -227,6 +339,9 @@ class Compilador(Tk):
         self.text_editor.config(height=1, width=1)
         self.line_numbers_text.config(height=1, width=2)
         self.output_console.config(height=0.1, width=1)
+        
+        # Reconfigurar tags después del cambio de fuente
+        self.after_idle(self.configure_tags)
 
     def Tokens(self):
         app2 = VentanaTokens()
@@ -234,52 +349,49 @@ class Compilador(Tk):
 
     def update_line_numbers(self, event=None):
         # Accede a lista_errores_lexicos a través de una instancia de Compilador
-        error_line = AL.lista_errores_lexicos
+        error_line = AL.lista_errores_lexicos if hasattr(AL, 'lista_errores_lexicos') else []
         # Actualiza los números de línea en función del número de líneas en el editor
         lines = self.text_editor.get(1.0, "end-1c").count("\n")
-        #AL.contador = self.text_editor.get(1.0, "end-1c").count("\n")+1
-        #print(contador)
+        
         self.line_numbers_text.config(state="normal")
         self.line_numbers_text.delete(1.0, "end")
-        if not error_line:
-            for line in range(1, lines + 2):
+        
+        for line in range(1, lines + 2):
+            if line in error_line:
+                # Si la línea es la línea del error, establecer el color de fondo en rojo
+                self.line_numbers_text.insert("end", str(line) + "\n", 'error_line')
+            else:
                 self.line_numbers_text.insert("end", str(line) + "\n")
-        else:
-            for line in range(1, lines + 2):
-                if line in error_line:
-                    # Si la línea es la línea del error, establecer el color de fondo en rojo
-                    self.line_numbers_text.insert("end", str(line) + "\n", 'error_line')
-                else:
-                    self.line_numbers_text.insert("end", str(line) + "\n")
+                
         self.line_numbers_text.tag_configure('error_line', foreground='red')
         self.line_numbers_text.config(state="disabled")
 
         # Sincronizar los scrolls de los números de línea con el editor de código
-        self.line_numbers_text.yview_moveto(self.text_editor.yview()[0])
+        try:
+            self.line_numbers_text.yview_moveto(self.text_editor.yview()[0])
+        except:
+            pass
 
     def compilar(self):
         lin = self.text_editor.get(1.0, "end-1c").count("\n")+1
-        # Limpia la lista de errores antes de cada compilación
         limpiar_errores_lex()
-        # Limpiar la salida de consola
         self.output_console.delete(1.0, END)
-
-        # Obtiene todo el código del editor
         codigo = self.text_editor.get("1.0", END)
-
-        # Realiza la compilación utilizando el analizador léxico
         global resultados
         resultados = AL.analisis(codigo)
-
-        # Llama a update_line_numbers y pasa la lista de errores léxicos
         self.update_line_numbers()
+        self.resaltar_palabras_reservadas()
 
-        # Mostrar los errores léxicos en la consola de salida
-        errores_lexicos = AL.errores_Desc
-        for error in errores_lexicos:
-            self.output_console.insert(END, error + "\n")
+        # Mostrar errores léxicos
+        if hasattr(AL, 'errores_Desc'):
+            errores_lexicos = AL.errores_Desc
+            for error in errores_lexicos:
+                if isinstance(error, dict):
+                    self.output_console.insert(END, f"{error['message']} (Línea: {error['line']}, Columna: {error['col']})\n")
+                else:
+                    self.output_console.insert(END, str(error) + "\n")
 
-        # # Análisis Sintáctico
+        # Análisis Sintáctico
         limpiar_errores()
         global resultadosSintactico
         # Crear un lexer nuevo y reiniciar su línea
@@ -291,9 +403,13 @@ class Compilador(Tk):
         print("Resultado del análisis sintáctico:", resultadosSintactico)
 
         # Mostrar los errores sintácticos en la consola de salida
-        errores_Sinc_Desc = AS.errores_Sinc_Desc
-        for error in errores_Sinc_Desc:
-            self.output_console.insert(END, error + "\n")
+        if hasattr(AS, 'errores_Sinc_Desc'):
+            errores_Sinc_Desc = AS.errores_Sinc_Desc
+            for error in errores_Sinc_Desc:
+                if isinstance(error, dict):
+                    self.output_console.insert(END, f"{error['message']} (Línea: {error['line']}, Columna: {error['col']})\n")
+                else:
+                    self.output_console.insert(END, str(error) + "\n")
 
         # Mostrar el resultado del análisis sintáctico en la consola de salida
         self.output_console.insert(END, "\nResultado del análisis sintáctico:\n")
@@ -303,4 +419,3 @@ class Compilador(Tk):
 if __name__ == "__main__":
     app = Compilador()
     app.mainloop()
-
