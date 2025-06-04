@@ -109,7 +109,7 @@ class Compilador(Tk):
         self.editor_frame.pack(expand=True, fill="both")
 
         # Editor de código
-        self.text_editor = scrolledtext.ScrolledText(self.editor_frame, wrap=WORD)
+        self.text_editor = scrolledtext.ScrolledText(self.editor_frame, wrap=WORD, undo=True)
         self.text_editor.pack(expand=True, fill="both", side="right")
         # Frame para los números de línea
         self.line_numbers_frame = ttk.Frame(self.editor_frame, width=30)
@@ -144,11 +144,36 @@ class Compilador(Tk):
         self.text_editor.bind("<Button-5>", self.update_line_numbers)
         self.text_editor.bind("<Configure>", self.update_line_numbers)
 
+        # Agregar estos bindings para Ctrl+Z y Ctrl+Y
+        self.text_editor.bind("<Control-z>", self.deshacer)
+        self.text_editor.bind("<Control-y>", self.rehacer)
+
+    def deshacer(self, event=None):
+        """Deshacer la última acción"""
+        try:
+            self.text_editor.edit_undo()
+            self.update_line_numbers_and_highlight()
+            return "break"  # Previene que el evento se propague
+        except TclError:  # Si no hay más acciones para deshacer
+            return
+
+    def rehacer(self, event=None):
+        """Rehacer la última acción deshecha"""
+        try:
+            self.text_editor.edit_redo()
+            self.update_line_numbers_and_highlight()
+            return "break"  # Previene que el evento se propague
+        except TclError:  # Si no hay más acciones para rehacer
+            return
+
     def configure_tags(self):
         """Configurar todos los tags de una vez"""
         self.text_editor.tag_configure('reservadas', foreground='blue', font=('Consolas', 10, 'bold'))
         self.text_editor.tag_configure('error_lexico', background='yellow', underline=True)
         self.text_editor.tag_configure('tooltip', background='lightyellow')
+        self.output_console.tag_configure("error_link_style", foreground="blue", underline=True)
+        self.output_console.tag_configure("success_style", foreground="green")
+        self.text_editor.tag_configure("line_error_highlight", background="yellow")
 
     def resaltar_palabras_reservadas(self):
         """Versión mejorada del resaltado de palabras reservadas"""
@@ -258,6 +283,32 @@ class Compilador(Tk):
         # Usar after_idle para asegurar que se ejecute después de otras operaciones
         self.after_idle(self.update_line_numbers)
         self.after_idle(self.resaltar_palabras_reservadas)
+
+    def _navigate_to_error(self, target_line, target_col, event=None):
+        """Navega el editor a la línea y columna especificadas y resalta la línea."""
+        print(f"Navegando a línea {target_line}, columna {target_col}")  # Debug
+        if target_line != -1:
+            # Asegurarse de que la línea sea visible
+            self.text_editor.see(f"{target_line}.0")
+            
+            # Mover el cursor
+            self.text_editor.mark_set("insert", f"{target_line}.{target_col}")
+            
+            # Dar foco al editor
+            self.text_editor.focus_set()
+            
+            # Resaltar la línea
+            line_start = f"{target_line}.0"
+            line_end = f"{target_line}.end"
+            
+            # Remover resaltados anteriores
+            self.text_editor.tag_remove("line_error_highlight", "1.0", END)
+            
+            # Aplicar nuevo resaltado
+            self.text_editor.tag_add("line_error_highlight", line_start, line_end)
+            
+            # Remover el resaltado después de 2 segundos
+            self.after(2000, lambda: self.text_editor.tag_remove("line_error_highlight", line_start, line_end))
 
     def nuevo_archivo(self):
         if self.text_editor.get("1.0", END).strip():
@@ -383,13 +434,131 @@ class Compilador(Tk):
         self.resaltar_palabras_reservadas()
 
         # Mostrar errores léxicos
+        self._error_link_id_counter = 0
+        
+        # Mostrar errores léxicos
         if hasattr(AL, 'errores_Desc'):
             errores_lexicos = AL.errores_Desc
             for error in errores_lexicos:
                 if isinstance(error, dict):
-                    self.output_console.insert(END, f"{error['message']} (Línea: {error['line']}, Columna: {error['col']})\n")
-                else:
-                    self.output_console.insert(END, str(error) + "\n")
+                    line = error['line']
+                    col = error['col']
+                    message = error['message']
+                    
+                    # Primero inserta el mensaje principal sin tag
+                    self.output_console.insert(END, f"{message} ")
+                    
+                    # Luego inserta la parte de línea y columna con el tag clickeable
+                    link_start_idx = self.output_console.index(END + "-1c")
+                    self.output_console.insert(END, f"(Línea: {line}, Columna: {col})\n")
+                    link_end_idx = self.output_console.index(END + "-1c")
+                    
+                    # Aplicar tag solo a la parte de línea y columna
+                    self.output_console.tag_add("error_link_style", link_start_idx, link_end_idx)
+                    
+                    # Vincular eventos solo al tag
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Button-1>", 
+                        lambda e, l=line, c=col: self._navigate_to_error(l, c)
+                    )
+                    
+                    # Cambiar cursor al pasar por encima
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Enter>", 
+                        lambda e: self.output_console.config(cursor="hand2")
+                    )
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Leave>", 
+                        lambda e: self.output_console.config(cursor="")
+                    )
+
+        #Mostrar Errores Inteligentes
+        def mostrar_errores_inteligentes(self):
+            """Muestra errores con análisis inteligente"""
+            # Primero, limpiar la consola
+            self.output_console.delete(1.0, END)
+            
+            # Combinar errores léxicos y sintácticos para analizar qué tipo es más probable
+            errores_combinados = []
+            
+            if hasattr(AL, 'errores_Desc'):
+                for error in AL.errores_Desc:
+                    if isinstance(error, dict):
+                        error['tipo'] = 'léxico'
+                        errores_combinados.append(error)
+            
+            if hasattr(AS, 'errores_Sinc_Desc'):
+                for error in AS.errores_Sinc_Desc:
+                    if isinstance(error, dict):
+                        error['tipo'] = 'sintáctico'
+                        errores_combinados.append(error)
+            
+            # Ordenar por línea para mostrar en orden
+            errores_combinados.sort(key=lambda x: x.get('line', 0))
+            
+            # Verificar si hay errores en la misma línea (léxicos y sintácticos)
+            lineas_con_multiples_errores = {}
+            for error in errores_combinados:
+                linea = error.get('line', -1)
+                if linea != -1:
+                    if linea not in lineas_con_multiples_errores:
+                        lineas_con_multiples_errores[linea] = []
+                    lineas_con_multiples_errores[linea].append(error)
+            
+            # Analizar y mostrar errores
+            for error in errores_combinados:
+                linea = error.get('line', -1)
+                col = error.get('col', 0)
+                mensaje = error.get('message', '')
+                tipo = error.get('tipo', '')
+                sugerencia = error.get('suggestion', '')
+                subtipo = error.get('error_subtype', '')
+                
+                # Determinar el tipo más probable si hay varios errores en la misma línea
+                tipo_mostrado = tipo
+                if linea in lineas_con_multiples_errores and len(lineas_con_multiples_errores[linea]) > 1:
+                    # Si hay error sintáctico entre ellos, es más probable que sea ese
+                    if any(e['tipo'] == 'sintáctico' for e in lineas_con_multiples_errores[linea]):
+                        tipo_mostrado = 'sintáctico (probable)'
+                    else:
+                        tipo_mostrado = 'léxico (probable)'
+                
+                # Construir mensaje completo
+                mensaje_completo = f"Error {tipo_mostrado}"
+                if subtipo:
+                    mensaje_completo += f" [{subtipo}]"
+                mensaje_completo += f": {mensaje}"
+                
+                # Agregar el mensaje a la consola
+                self.output_console.insert(END, mensaje_completo + " ")
+                
+                # Agregar la parte clickeable (línea y columna)
+                if linea != -1:
+                    link_start_idx = self.output_console.index(END + "-1c")
+                    self.output_console.insert(END, f"(Línea: {linea}, Columna: {col})\n")
+                    link_end_idx = self.output_console.index(END + "-1c")
+                    
+                    self.output_console.tag_add("error_link_style", link_start_idx, link_end_idx)
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Button-1>", 
+                        lambda e, l=linea, c=col: self._navigate_to_error(l, c)
+                    )
+                    
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Enter>", 
+                        lambda e: self.output_console.config(cursor="hand2")
+                    )
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Leave>", 
+                        lambda e: self.output_console.config(cursor="")
+                    )
+        
 
         # Análisis Sintáctico
         limpiar_errores()
@@ -407,7 +576,39 @@ class Compilador(Tk):
             errores_Sinc_Desc = AS.errores_Sinc_Desc
             for error in errores_Sinc_Desc:
                 if isinstance(error, dict):
-                    self.output_console.insert(END, f"{error['message']} (Línea: {error['line']}, Columna: {error['col']})\n")
+                    line = error['line']
+                    col = error['col']
+                    message = error['message']
+                    
+                    # Primero inserta el mensaje principal sin tag
+                    self.output_console.insert(END, f"{message} ")
+                    
+                    # Luego inserta la parte de línea y columna con el tag clickeable
+                    link_start_idx = self.output_console.index(END + "-1c")
+                    self.output_console.insert(END, f"(Línea: {line}, Columna: {col})\n")
+                    link_end_idx = self.output_console.index(END + "-1c")
+                    
+                    # Aplicar tag solo a la parte de línea y columna
+                    self.output_console.tag_add("error_link_style", link_start_idx, link_end_idx)
+                    
+                    # Vincular eventos solo al tag
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Button-1>", 
+                        lambda e, l=line, c=col: self._navigate_to_error(l, c)
+                    )
+                    
+                    # Cambiar cursor al pasar por encima
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Enter>", 
+                        lambda e: self.output_console.config(cursor="hand2")
+                    )
+                    self.output_console.tag_bind(
+                        "error_link_style",
+                        "<Leave>", 
+                        lambda e: self.output_console.config(cursor="")
+                    )
                 else:
                     self.output_console.insert(END, str(error) + "\n")
 

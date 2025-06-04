@@ -232,16 +232,94 @@ def p_elemento(p):
 
 # Manejo de errores sintácticos
 def p_error(p):
+    global errores_Sinc_Desc
     if p:
-        error_msg = {
-            'message': f"Error de sintaxis en '{p.value}'",
+        # Calcular la columna
+        lexer_data = p.lexer.lexdata
+        col = 0
+        if lexer_data:
+            line_start = lexer_data.rfind('\n', 0, p.lexpos) + 1
+            col = p.lexpos - line_start + 1
+        
+        # Obtener contexto
+        context = ""
+        if lexer_data:
+            lines = lexer_data.splitlines()
+            if 0 <= p.lineno-1 < len(lines):
+                context = lines[p.lineno-1]
+        
+        # Analizar posibles causas específicas
+        sugerencia = ""
+        error_detallado = "Error de sintaxis"
+        
+        # Errores comunes basados en el token y su posición
+        if p.type == 'IDENTIFICADOR':
+            # Verificar si se esperaba un token específico
+            if p.value == 'automaton':
+                sugerencia = "Debe especificar un nombre después de 'automaton'"
+            else:
+                # Posible uso incorrecto de identificador
+                token_previo = parser.symstack[-2].type if len(parser.symstack) > 1 else None
+                if token_previo == 'AUTOMATON':
+                    sugerencia = "Después del nombre del autómata debe venir '{'"
+                elif token_previo in ['TYPE', 'INITIAL']:
+                    sugerencia = f"Después de '{token_previo.lower()}' debe usar '='"
+                elif token_previo == 'ASIGNACION':
+                    token_previo_2 = parser.symstack[-3].type if len(parser.symstack) > 2 else None
+                    if token_previo_2 == 'TYPE':
+                        sugerencia = "El tipo debe ser DFA, NFA, PDA o TM"
+        
+        elif p.type in ['LLAVE_A', 'LLAVE_C']:
+            if p.type == 'LLAVE_A':
+                sugerencia = "Verifique que las propiedades estén correctamente definidas dentro de las llaves"
+            else:
+                sugerencia = "Verifique que todas las propiedades terminen con ';'"
+        
+        elif p.type in ['CORCHETE_A', 'CORCHETE_B']:
+            if p.type == 'CORCHETE_A':
+                sugerencia = "Después de '[' debe venir una lista de elementos separados por comas"
+            else:
+                sugerencia = "Verifique que todos los elementos estén correctamente separados por comas"
+        
+        elif p.type == 'PUNTOCOMA':
+            sugerencia = "Verifique que la propiedad anterior esté correctamente definida"
+        
+        elif p.type == 'ASIGNACION':
+            sugerencia = "Después de '=' debe especificar un valor válido"
+        
+        elif p.type == 'TRANSICION':
+            sugerencia = "La transición debe estar en el formato: estado_origen -> estado_destino [atributos];"
+        
+        # Construir mensaje de error
+        if sugerencia:
+            error_detallado = f"{error_detallado}. {sugerencia}"
+        
+        error_info = {
+            'message': f"{error_detallado} en '{p.value}'",
             'line': p.lineno,
-            'col': p.lexpos if hasattr(p, 'lexpos') else None,
-            'type': 'Sintáctico'
+            'col': col,
+            'value': p.value,
+            'context': context,
+            'token_type': p.type,
+            'suggestion': sugerencia
         }
-        errores_Sinc_Desc.append(error_msg)
+        
+        errores_Sinc_Desc.append(error_info)
+        
+        # Modo de recuperación de pánico
+        while True:
+            token = parser.token()
+            if not token or token.type in ['PUNTOCOMA', 'LLAVE_C']:
+                break
+        
+        if token:
+            return token
     else:
-        errores_Sinc_Desc.append({'message': "Error de sintaxis al final del archivo", 'line': None, 'col': None, 'type': 'Sintáctico'})
+        errores_Sinc_Desc.append({
+            'message': "Error de sintaxis al final del archivo. Posiblemente falten llaves de cierre '}'",
+            'line': -1,
+            'col': -1
+        })
 # Construir el analizador sintáctico
 parser = yacc.yacc()
 
