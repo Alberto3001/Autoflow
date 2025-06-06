@@ -423,119 +423,71 @@ class Compilador(Tk):
         except:
             pass
 
-    def compilar(self):
-        lin = self.text_editor.get(1.0, "end-1c").count("\n")+1
-        limpiar_errores_lex()
+    def mostrar_errores_inteligentes(self):
+        """Muestra errores con análisis inteligente eliminando falsos positivos"""
+        # Primero, limpiar la consola
         self.output_console.delete(1.0, END)
-        codigo = self.text_editor.get("1.0", END)
-        global resultados
-        resultados = AL.analisis(codigo)
-        self.update_line_numbers()
-        self.resaltar_palabras_reservadas()
-
-        # Mostrar errores léxicos
-        self._error_link_id_counter = 0
         
-        # Mostrar errores léxicos
+        # Combinar errores léxicos y sintácticos
+        errores_combinados = []
+        
+        # Errores léxicos
         if hasattr(AL, 'errores_Desc'):
-            errores_lexicos = AL.errores_Desc
-            for error in errores_lexicos:
+            for error in AL.errores_Desc:
                 if isinstance(error, dict):
-                    line = error['line']
-                    col = error['col']
-                    message = error['message']
-                    
-                    # Primero inserta el mensaje principal sin tag
-                    self.output_console.insert(END, f"{message} ")
-                    
-                    # Luego inserta la parte de línea y columna con el tag clickeable
-                    link_start_idx = self.output_console.index(END + "-1c")
-                    self.output_console.insert(END, f"(Línea: {line}, Columna: {col})\n")
-                    link_end_idx = self.output_console.index(END + "-1c")
-                    
-                    # Aplicar tag solo a la parte de línea y columna
-                    self.output_console.tag_add("error_link_style", link_start_idx, link_end_idx)
-                    
-                    # Vincular eventos solo al tag
-                    self.output_console.tag_bind(
-                        "error_link_style",
-                        "<Button-1>", 
-                        lambda e, l=line, c=col: self._navigate_to_error(l, c)
-                    )
-                    
-                    # Cambiar cursor al pasar por encima
-                    self.output_console.tag_bind(
-                        "error_link_style",
-                        "<Enter>", 
-                        lambda e: self.output_console.config(cursor="hand2")
-                    )
-                    self.output_console.tag_bind(
-                        "error_link_style",
-                        "<Leave>", 
-                        lambda e: self.output_console.config(cursor="")
-                    )
-
-        #Mostrar Errores Inteligentes
-        def mostrar_errores_inteligentes(self):
-            """Muestra errores con análisis inteligente"""
-            # Primero, limpiar la consola
-            self.output_console.delete(1.0, END)
+                    error['tipo'] = 'léxico'
+                    errores_combinados.append(error)
+        
+        # Errores sintácticos - filtrar falsos positivos
+        if hasattr(AS, 'errores_Sinc_Desc'):
+            errores_sintacticos_filtrados = []
             
-            # Combinar errores léxicos y sintácticos para analizar qué tipo es más probable
-            errores_combinados = []
+            # Errores prioritarios que siempre deben mostrarse
+            for error in AS.errores_Sinc_Desc:
+                if isinstance(error, dict):
+                    # Incluir todos los errores específicos con mensajes detallados
+                    if any(phrase in error.get('message', '') for phrase in 
+                        ["Falta el signo de igual", "Falta la flecha", "palabra clave correcta", 
+                         "atributo de transición", "Falta punto y coma", "Propiedad no reconocida"]):  # Añadido "Propiedad no reconocida"
+                        error['tipo'] = 'sintáctico'
+                        errores_sintacticos_filtrados.append(error)
             
-            if hasattr(AL, 'errores_Desc'):
-                for error in AL.errores_Desc:
-                    if isinstance(error, dict):
-                        error['tipo'] = 'léxico'
-                        errores_combinados.append(error)
-            
-            if hasattr(AS, 'errores_Sinc_Desc'):
+            # Si no hay errores prioritarios, incluir otros errores sintácticos
+            if not errores_sintacticos_filtrados:
                 for error in AS.errores_Sinc_Desc:
                     if isinstance(error, dict):
                         error['tipo'] = 'sintáctico'
-                        errores_combinados.append(error)
+                        errores_sintacticos_filtrados.append(error)
             
-            # Ordenar por línea para mostrar en orden
-            errores_combinados.sort(key=lambda x: x.get('line', 0))
-            
-            # Verificar si hay errores en la misma línea (léxicos y sintácticos)
-            lineas_con_multiples_errores = {}
-            for error in errores_combinados:
-                linea = error.get('line', -1)
-                if linea != -1:
-                    if linea not in lineas_con_multiples_errores:
-                        lineas_con_multiples_errores[linea] = []
-                    lineas_con_multiples_errores[linea].append(error)
-            
-            # Analizar y mostrar errores
-            for error in errores_combinados:
+            errores_combinados.extend(errores_sintacticos_filtrados)
+        
+        # Ordenar por línea para mostrar en orden
+        errores_combinados.sort(key=lambda x: x.get('line', 0))
+        
+        # Eliminar duplicados (errores en la misma línea)
+        errores_filtrados = []
+        lineas_vistas = set()
+        
+        for error in errores_combinados:
+            linea = error.get('line', -1)
+            if linea not in lineas_vistas:
+                errores_filtrados.append(error)
+                lineas_vistas.add(linea)
+        
+        # Mostrar errores filtrados
+        if not errores_filtrados:
+            self.output_console.insert(END, "Compilación exitosa. No se encontraron errores.\n", "success_style")
+        else:
+            for error in errores_filtrados:
                 linea = error.get('line', -1)
                 col = error.get('col', 0)
                 mensaje = error.get('message', '')
                 tipo = error.get('tipo', '')
-                sugerencia = error.get('suggestion', '')
-                subtipo = error.get('error_subtype', '')
                 
-                # Determinar el tipo más probable si hay varios errores en la misma línea
-                tipo_mostrado = tipo
-                if linea in lineas_con_multiples_errores and len(lineas_con_multiples_errores[linea]) > 1:
-                    # Si hay error sintáctico entre ellos, es más probable que sea ese
-                    if any(e['tipo'] == 'sintáctico' for e in lineas_con_multiples_errores[linea]):
-                        tipo_mostrado = 'sintáctico (probable)'
-                    else:
-                        tipo_mostrado = 'léxico (probable)'
+                # Mostrar mensaje
+                self.output_console.insert(END, f"Error {tipo}: {mensaje} ")
                 
-                # Construir mensaje completo
-                mensaje_completo = f"Error {tipo_mostrado}"
-                if subtipo:
-                    mensaje_completo += f" [{subtipo}]"
-                mensaje_completo += f": {mensaje}"
-                
-                # Agregar el mensaje a la consola
-                self.output_console.insert(END, mensaje_completo + " ")
-                
-                # Agregar la parte clickeable (línea y columna)
+                # Agregar parte clickeable
                 if linea != -1:
                     link_start_idx = self.output_console.index(END + "-1c")
                     self.output_console.insert(END, f"(Línea: {linea}, Columna: {col})\n")
@@ -558,64 +510,52 @@ class Compilador(Tk):
                         "<Leave>", 
                         lambda e: self.output_console.config(cursor="")
                     )
-        
+            
+            # Mostrar un mensaje adicional si no se pudo completar el análisis
+            if not resultadosSintactico:
+                self.output_console.insert(END, "\nNo se pudo completar el análisis sintáctico debido a errores.\n")
 
-        # Análisis Sintáctico
-        limpiar_errores()
+    def compilar(self):
+        lin = self.text_editor.get(1.0, "end-1c").count("\n")+1
+        limpiar_errores_lex()
+        limpiar_errores()  # Reiniciar también las variables de errores sintácticos
+        self.output_console.delete(1.0, END)
+        codigo = self.text_editor.get("1.0", END)
+        
+        # Análisis léxico
+        global resultados
+        resultados = AL.analisis(codigo)
+        self.update_line_numbers()
+        self.resaltar_palabras_reservadas()
+        
+        # Imprimir información de depuración
+        print("Analizando código...")
+        print("Longitud del código:", len(codigo))
+        
+        # Análisis sintáctico
         global resultadosSintactico
-        # Crear un lexer nuevo y reiniciar su línea
         lexer = AL.lexer
         lexer.lineno = 1
         resultadosSintactico = AS.test_parser(codigo, lexer=lexer)
-
-        # Imprimir resultados sintácticos en la consola de Python para depuración
+        
+        # Imprimir resultados y errores para depuración
         print("Resultado del análisis sintáctico:", resultadosSintactico)
-
-        # Mostrar los errores sintácticos en la consola de salida
-        if hasattr(AS, 'errores_Sinc_Desc'):
-            errores_Sinc_Desc = AS.errores_Sinc_Desc
-            for error in errores_Sinc_Desc:
-                if isinstance(error, dict):
-                    line = error['line']
-                    col = error['col']
-                    message = error['message']
-                    
-                    # Primero inserta el mensaje principal sin tag
-                    self.output_console.insert(END, f"{message} ")
-                    
-                    # Luego inserta la parte de línea y columna con el tag clickeable
-                    link_start_idx = self.output_console.index(END + "-1c")
-                    self.output_console.insert(END, f"(Línea: {line}, Columna: {col})\n")
-                    link_end_idx = self.output_console.index(END + "-1c")
-                    
-                    # Aplicar tag solo a la parte de línea y columna
-                    self.output_console.tag_add("error_link_style", link_start_idx, link_end_idx)
-                    
-                    # Vincular eventos solo al tag
-                    self.output_console.tag_bind(
-                        "error_link_style",
-                        "<Button-1>", 
-                        lambda e, l=line, c=col: self._navigate_to_error(l, c)
-                    )
-                    
-                    # Cambiar cursor al pasar por encima
-                    self.output_console.tag_bind(
-                        "error_link_style",
-                        "<Enter>", 
-                        lambda e: self.output_console.config(cursor="hand2")
-                    )
-                    self.output_console.tag_bind(
-                        "error_link_style",
-                        "<Leave>", 
-                        lambda e: self.output_console.config(cursor="")
-                    )
-                else:
-                    self.output_console.insert(END, str(error) + "\n")
-
-        # Mostrar el resultado del análisis sintáctico en la consola de salida
-        self.output_console.insert(END, "\nResultado del análisis sintáctico:\n")
-        self.output_console.insert(END, str(resultadosSintactico) + "\n")
-
+        print("Errores léxicos:", AL.errores_Desc)
+        print("Errores sintácticos:", AS.errores_Sinc_Desc)
+        
+        # Usar la función mejorada para mostrar errores
+        self.mostrar_errores_inteligentes()
+        
+        # Verificar explícitamente si hay errores
+        if (hasattr(AL, 'errores_Desc') and AL.errores_Desc) or (hasattr(AS, 'errores_Sinc_Desc') and AS.errores_Sinc_Desc):
+            # Hay errores, no mostrar "compilación exitosa" adicional
+            if not resultadosSintactico:
+                self.output_console.insert(END, "\nNo se pudo completar el análisis sintáctico debido a errores.\n")
+        
+        # Mostrar el resultado del análisis sintáctico si hay resultados
+        if resultadosSintactico:
+            self.output_console.insert(END, "\nResultado del análisis sintáctico:\n")
+            self.output_console.insert(END, str(resultadosSintactico) + "\n")
 
 if __name__ == "__main__":
     app = Compilador()
