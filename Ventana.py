@@ -440,26 +440,20 @@ class Compilador(Tk):
         
         # Errores sintácticos - filtrar falsos positivos
         if hasattr(AS, 'errores_Sinc_Desc'):
-            errores_sintacticos_filtrados = []
+            # Filtrar errores críticos primero (los más importantes)
+            errores_criticos = [e for e in AS.errores_Sinc_Desc if isinstance(e, dict) and e.get('is_critical', False)]
             
-            # Errores prioritarios que siempre deben mostrarse
-            for error in AS.errores_Sinc_Desc:
-                if isinstance(error, dict):
-                    # Incluir todos los errores específicos con mensajes detallados
-                    if any(phrase in error.get('message', '') for phrase in 
-                        ["Falta el signo de igual", "Falta la flecha", "palabra clave correcta", 
-                         "atributo de transición", "Falta punto y coma", "Propiedad no reconocida"]):  # Añadido "Propiedad no reconocida"
-                        error['tipo'] = 'sintáctico'
-                        errores_sintacticos_filtrados.append(error)
-            
-            # Si no hay errores prioritarios, incluir otros errores sintácticos
-            if not errores_sintacticos_filtrados:
+            # Si hay errores críticos, mostrar solo esos
+            if errores_criticos:
+                for error in errores_criticos:
+                    error['tipo'] = 'sintáctico'
+                    errores_combinados.append(error)
+            else:
+                # Si no hay errores críticos, mostrar todos los errores sintácticos
                 for error in AS.errores_Sinc_Desc:
                     if isinstance(error, dict):
                         error['tipo'] = 'sintáctico'
-                        errores_sintacticos_filtrados.append(error)
-            
-            errores_combinados.extend(errores_sintacticos_filtrados)
+                        errores_combinados.append(error)
         
         # Ordenar por línea para mostrar en orden
         errores_combinados.sort(key=lambda x: x.get('line', 0))
@@ -470,9 +464,12 @@ class Compilador(Tk):
         
         for error in errores_combinados:
             linea = error.get('line', -1)
-            if linea not in lineas_vistas:
+            mensaje = error.get('message', '')
+            
+            # Evitar mensajes duplicados
+            if (linea, mensaje) not in lineas_vistas:
                 errores_filtrados.append(error)
-                lineas_vistas.add(linea)
+                lineas_vistas.add((linea, mensaje))
         
         # Mostrar errores filtrados
         if not errores_filtrados:
