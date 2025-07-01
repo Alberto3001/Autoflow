@@ -168,7 +168,10 @@ class Compilador(Tk):
 
     def configure_tags(self):
         """Configurar todos los tags de una vez"""
-        self.text_editor.tag_configure('reservadas', foreground='blue', font=('Consolas', 10, 'bold'))
+        font_str = self.text_editor.cget("font")
+        font = tkFont.Font(font=font_str)
+        font_tuple = (font.actual()["family"], font.actual()["size"], "bold")
+        self.text_editor.tag_configure('reservadas', foreground='blue', font=font_tuple)
         self.text_editor.tag_configure('error_lexico', background='yellow', underline=True)
         self.text_editor.tag_configure('tooltip', background='lightyellow')
         self.output_console.tag_configure("error_link_style", foreground="blue", underline=True)

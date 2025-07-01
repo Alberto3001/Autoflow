@@ -565,7 +565,7 @@ def test_parser(codigo, lexer=None):
 # Ejemplo de uso
 if __name__ == "__main__":
     codigo = '''
-    automato AFD_Ejemplo {
+    automaton AFD_Ejemplo {
       type = DFA;
       alphabet = {a, b};
       states = {q0, q1, q2};
