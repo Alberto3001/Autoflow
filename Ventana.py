@@ -9,6 +9,8 @@ import AnalizadorSintactico as AS
 from AnalizadorSintactico import limpiar_errores
 import tkinter as tk
 import re
+import AnalizadorSemantico as ASEM
+
 
 resultados = []
 resultadosSintactico = [] 
@@ -457,6 +459,13 @@ class Compilador(Tk):
                     if isinstance(error, dict):
                         error['tipo'] = 'sintáctico'
                         errores_combinados.append(error)
+
+        #Errores Semanticos
+        if hasattr(self, 'errores_semanticos_detectados') and self.errores_semanticos_detectados:
+            for error in self.errores_semanticos_detectados:
+                if isinstance(error, dict):
+                    error['tipo'] = 'semántico' # Asegurarse de que el tipo esté bien definido
+                    errores_combinados.append(error)
         
         # Ordenar por línea para mostrar en orden
         errores_combinados.sort(key=lambda x: x.get('line', 0))
@@ -528,18 +537,28 @@ class Compilador(Tk):
         self.update_line_numbers()
         self.resaltar_palabras_reservadas()
         
-        # Imprimir información de depuración
-        print("Analizando código...")
-        print("Longitud del código:", len(codigo))
-        
         # Análisis sintáctico
         global resultadosSintactico
         lexer = AL.lexer
         lexer.lineno = 1
         resultadosSintactico = AS.test_parser(codigo, lexer=lexer)
+        print("AST generado:", resultadosSintactico)
+
+        # Mostrar errores semánticos si el análisis sintáctico fue exitoso
+        self.errores_semanticos_detectados = []  # <-- Inicializa la lista
+        if resultadosSintactico:
+            errores_semanticos = ASEM.analizar_semantica(resultadosSintactico)
+            self.errores_semanticos_detectados = errores_semanticos  # <-- ¡ASÍ SE GUARDA!
+            if errores_semanticos:
+                self.output_console.insert(END, "\nErrores semánticos encontrados:\n")
+                for error in errores_semanticos:
+                    self.output_console.insert(END, f"- {error['message']}\n")
+            else:
+                self.output_console.insert(END, "\nAnálisis semántico exitoso. No se encontraron errores semánticos.\n")
+            self.output_console.insert(END, "\nResultado del análisis sintáctico:\n")
+            self.output_console.insert(END, str(resultadosSintactico) + "\n")
         
         # Imprimir resultados y errores para depuración
-        print("Resultado del análisis sintáctico:", resultadosSintactico)
         print("Errores léxicos:", AL.errores_Desc)
         print("Errores sintácticos:", AS.errores_Sinc_Desc)
         
@@ -551,11 +570,6 @@ class Compilador(Tk):
             # Hay errores, no mostrar "compilación exitosa" adicional
             if not resultadosSintactico:
                 self.output_console.insert(END, "\nNo se pudo completar el análisis sintáctico debido a errores.\n")
-        
-        # Mostrar el resultado del análisis sintáctico si hay resultados
-        if resultadosSintactico:
-            self.output_console.insert(END, "\nResultado del análisis sintáctico:\n")
-            self.output_console.insert(END, str(resultadosSintactico) + "\n")
 
 if __name__ == "__main__":
     app = Compilador()

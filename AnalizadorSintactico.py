@@ -473,15 +473,14 @@ def p_error(p):
         if lexer_data:
             line_start = lexer_data.rfind('\n', 0, p.lexpos) + 1
             col = p.lexpos - line_start + 1
-        
+
         # Obtener contexto
         context = ""
         if lexer_data:
             lines = lexer_data.splitlines()
             if 0 <= p.lineno-1 < len(lines):
                 context = lines[p.lineno-1]
-        
-        # Analizar posibles causas específicas
+
         sugerencia = ""
         error_detallado = "Error de sintaxis"
         
@@ -526,7 +525,7 @@ def p_error(p):
         # Construir mensaje de error
         if sugerencia:
             error_detallado = f"{error_detallado}. {sugerencia}"
-        
+
         error_info = {
             'message': f"{error_detallado} en '{p.value}'",
             'line': p.lineno,
@@ -536,17 +535,16 @@ def p_error(p):
             'token_type': p.type,
             'suggestion': sugerencia
         }
-        
+
         errores_Sinc_Desc.append(error_info)
-        
-        # Modo de recuperación de pánico
+
+        # Recuperación de pánico: consumir tokens hasta un punto seguro
         while True:
-            token = parser.token()
-            if not token or token.type in ['PUNTOCOMA', 'LLAVE_C']:
+            tok = parser.token()
+            if not tok or tok.type in ['PUNTOCOMA', 'LLAVE_C']:
                 break
-        
-        if token:
-            return token
+        # Retornar None para que el parser siga buscando más errores
+        return None
     else:
         errores_Sinc_Desc.append({
             'message': "Error de sintaxis al final del archivo. Posiblemente falten llaves de cierre '}'",
@@ -566,37 +564,6 @@ def test_parser(codigo, lexer=None):
 if __name__ == "__main__":
     codigo = '''
     automaton AFD_Ejemplo {
-      type = DFA;
-      alphabet = {a, b};
-      states = {q0, q1, q2};
-      initial = q0;
-      accept = {q2};
-
-      transitions {
-        q0 -> q1 [input = a];
-        q1 -> q2 [input = b];
-        q2 -> q2 [input = a];
-        q2 -> q1 [input = b];
-      }
-    }
-    '''
-    
-    resultado = test_parser(codigo)
-    print(resultado)
-    print(errores_Sinc_Desc)
-# Construir el analizador sintáctico
-parser = yacc.yacc()
-
-def test_parser(codigo, lexer=None):
-    if lexer is not None:
-        lexer.lineno = 1
-    result = parser.parse(codigo, lexer=lexer)
-    return result
-
-# Ejemplo de uso
-if __name__ == "__main__":
-    codigo = '''
-    automato AFD_Ejemplo {
       type = DFA;
       alphabet = {a, b};
       states = {q0, q1, q2};
