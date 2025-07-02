@@ -545,10 +545,10 @@ class Compilador(Tk):
         print("AST generado:", resultadosSintactico)
 
         # Mostrar errores semánticos si el análisis sintáctico fue exitoso
-        self.errores_semanticos_detectados = []  # <-- Inicializa la lista
+        self.errores_semanticos_detectados = [] 
         if resultadosSintactico:
             errores_semanticos = ASEM.analizar_semantica(resultadosSintactico)
-            self.errores_semanticos_detectados = errores_semanticos  # <-- ¡ASÍ SE GUARDA!
+            self.errores_semanticos_detectados = errores_semanticos 
             if errores_semanticos:
                 self.output_console.insert(END, "\nErrores semánticos encontrados:\n")
                 for error in errores_semanticos:

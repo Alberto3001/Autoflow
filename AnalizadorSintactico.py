@@ -411,12 +411,26 @@ def p_atributo(p):
     """
     p[0] = (p[1], p[3])
 
-# Permitir que ciertos nombres reservados (por ejemplo, "input") sean reconocidos en atributos.
 def p_atributo_reserved(p):
     """
     atributo : INPUT ASIGNACION valor
     """
     p[0] = (p[1], p[3])
+
+def p_atributo_reserved_tm(p):
+    """
+    atributo : READ ASIGNACION valor
+             | WRITE ASIGNACION valor
+             | MOVE ASIGNACION valor
+    """
+    p[0] = (p[1].lower(), p[3])
+
+def p_atributo_reserved_pda(p):
+    """
+    atributo : POP ASIGNACION valor
+             | PUSH ASIGNACION valor
+    """
+    p[0] = (p[1].lower(), p[3])
 
 # Definición de un valor (puede ser un símbolo, EPSILON, identificador o direcciones)
 def p_valor(p):

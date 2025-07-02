@@ -4,11 +4,6 @@ Unused terminals:
 
     COMENTARIO_BLOQUE
     COMENTARIO_LINEA
-    MOVE
-    POP
-    PUSH
-    READ
-    WRITE
 
 Grammar
 
@@ -51,58 +46,63 @@ Rule 35    atributos -> atributo
 Rule 36    atributos -> atributos COMA atributo
 Rule 37    atributo -> IDENTIFICADOR ASIGNACION valor
 Rule 38    atributo -> INPUT ASIGNACION valor
-Rule 39    valor -> SIMBOLO
-Rule 40    valor -> EPSILON
-Rule 41    valor -> IDENTIFICADOR
-Rule 42    valor -> LEFT
-Rule 43    valor -> RIGHT
-Rule 44    valor -> STAY
-Rule 45    conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C
-Rule 46    conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C
-Rule 47    elementos_conjunto -> elemento
-Rule 48    elementos_conjunto -> elementos_conjunto COMA elemento
-Rule 49    elemento -> SIMBOLO
-Rule 50    elemento -> IDENTIFICADOR
+Rule 39    atributo -> READ ASIGNACION valor
+Rule 40    atributo -> WRITE ASIGNACION valor
+Rule 41    atributo -> MOVE ASIGNACION valor
+Rule 42    atributo -> POP ASIGNACION valor
+Rule 43    atributo -> PUSH ASIGNACION valor
+Rule 44    valor -> SIMBOLO
+Rule 45    valor -> EPSILON
+Rule 46    valor -> IDENTIFICADOR
+Rule 47    valor -> LEFT
+Rule 48    valor -> RIGHT
+Rule 49    valor -> STAY
+Rule 50    conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C
+Rule 51    conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C
+Rule 52    elementos_conjunto -> elemento
+Rule 53    elementos_conjunto -> elementos_conjunto COMA elemento
+Rule 54    elemento -> SIMBOLO
+Rule 55    elemento -> IDENTIFICADOR
 
 Terminals, with rules where they appear
 
 ACCEPT               : 24
 ALPHABET             : 21
-ASIGNACION           : 16 21 22 23 24 25 26 27 28 29 30 37 38
+ASIGNACION           : 16 21 22 23 24 25 26 27 28 29 30 37 38 39 40 41 42 43
 AUTOMATON            : 3
 BLANK                : 29 30
-COMA                 : 36 48
+COMA                 : 36 53
 COMENTARIO_BLOQUE    : 
 COMENTARIO_LINEA     : 
 CORCHETE_A           : 34
 CORCHETE_B           : 34
 DFA                  : 17
-EPSILON              : 40
-IDENTIFICADOR        : 3 23 27 30 34 34 37 41 50
+EPSILON              : 45
+IDENTIFICADOR        : 3 23 27 30 34 34 37 46 55
 INITIAL              : 23
 INPUT                : 38
-LEFT                 : 42
-LLAVE_A              : 3 31 45 46
-LLAVE_C              : 3 31 45 46
-MOVE                 : 
+LEFT                 : 47
+LLAVE_A              : 3 31 50 51
+LLAVE_C              : 3 31 50 51
+MOVE                 : 41
 NFA                  : 18
 PDA                  : 19
-POP                  : 
+POP                  : 42
 PUNTOCOMA            : 16 21 22 23 24 25 26 27 28 29 30 34
-PUSH                 : 
-READ                 : 
-RIGHT                : 43
-SIMBOLO              : 26 29 39 49
+PUSH                 : 43
+READ                 : 39
+RIGHT                : 48
+SIMBOLO              : 26 29 44 54
 STACK_ALPHABET       : 25
 STACK_START          : 26 27
 STATES               : 22
-STAY                 : 44
+STAY                 : 49
 TAPE_ALPHABET        : 28
 TM                   : 20
 TRANSICION           : 34
 TRANSITIONS          : 31
 TYPE                 : 16
-WRITE                : 
+WRITE                : 40
 error                : 
 
 Nonterminals, with rules where they appear
@@ -116,8 +116,8 @@ blank_def            : 15
 conjunto_ids         : 22 24
 conjunto_simbolos    : 21 25 28
 definicion_automa    : 3
-elemento             : 47 48
-elementos_conjunto   : 45 46 48
+elemento             : 52 53
+elementos_conjunto   : 50 51 53
 initial_def          : 10
 lista_transiciones   : 31 33
 programa             : 2 0
@@ -131,7 +131,7 @@ tipo_automa          : 16
 transicion_def       : 32 33
 transiciones_def     : 4
 type_def             : 7
-valor                : 37 38
+valor                : 37 38 39 40 41 42 43
 
 Parsing method: LALR
 
@@ -574,7 +574,7 @@ state 32
 state 33
 
     (21) alphabet_def -> ALPHABET ASIGNACION . conjunto_simbolos PUNTOCOMA
-    (45) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
+    (50) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
 
     LLAVE_A         shift and go to state 48
 
@@ -583,7 +583,7 @@ state 33
 state 34
 
     (22) states_def -> STATES ASIGNACION . conjunto_ids PUNTOCOMA
-    (46) conjunto_ids -> . LLAVE_A elementos_conjunto LLAVE_C
+    (51) conjunto_ids -> . LLAVE_A elementos_conjunto LLAVE_C
 
     LLAVE_A         shift and go to state 50
 
@@ -599,7 +599,7 @@ state 35
 state 36
 
     (24) accept_def -> ACCEPT ASIGNACION . conjunto_ids PUNTOCOMA
-    (46) conjunto_ids -> . LLAVE_A elementos_conjunto LLAVE_C
+    (51) conjunto_ids -> . LLAVE_A elementos_conjunto LLAVE_C
 
     LLAVE_A         shift and go to state 50
 
@@ -608,7 +608,7 @@ state 36
 state 37
 
     (25) stack_alphabet_def -> STACK_ALPHABET ASIGNACION . conjunto_simbolos PUNTOCOMA
-    (45) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
+    (50) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
 
     LLAVE_A         shift and go to state 48
 
@@ -626,7 +626,7 @@ state 38
 state 39
 
     (28) tape_alphabet_def -> TAPE_ALPHABET ASIGNACION . conjunto_simbolos PUNTOCOMA
-    (45) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
+    (50) conjunto_simbolos -> . LLAVE_A elementos_conjunto LLAVE_C
 
     LLAVE_A         shift and go to state 48
 
@@ -697,11 +697,11 @@ state 47
 
 state 48
 
-    (45) conjunto_simbolos -> LLAVE_A . elementos_conjunto LLAVE_C
-    (47) elementos_conjunto -> . elemento
-    (48) elementos_conjunto -> . elementos_conjunto COMA elemento
-    (49) elemento -> . SIMBOLO
-    (50) elemento -> . IDENTIFICADOR
+    (50) conjunto_simbolos -> LLAVE_A . elementos_conjunto LLAVE_C
+    (52) elementos_conjunto -> . elemento
+    (53) elementos_conjunto -> . elementos_conjunto COMA elemento
+    (54) elemento -> . SIMBOLO
+    (55) elemento -> . IDENTIFICADOR
 
     SIMBOLO         shift and go to state 66
     IDENTIFICADOR   shift and go to state 67
@@ -718,11 +718,11 @@ state 49
 
 state 50
 
-    (46) conjunto_ids -> LLAVE_A . elementos_conjunto LLAVE_C
-    (47) elementos_conjunto -> . elemento
-    (48) elementos_conjunto -> . elementos_conjunto COMA elemento
-    (49) elemento -> . SIMBOLO
-    (50) elemento -> . IDENTIFICADOR
+    (51) conjunto_ids -> LLAVE_A . elementos_conjunto LLAVE_C
+    (52) elementos_conjunto -> . elemento
+    (53) elementos_conjunto -> . elementos_conjunto COMA elemento
+    (54) elemento -> . SIMBOLO
+    (55) elemento -> . IDENTIFICADOR
 
     SIMBOLO         shift and go to state 66
     IDENTIFICADOR   shift and go to state 67
@@ -846,8 +846,8 @@ state 63
 
 state 64
 
-    (45) conjunto_simbolos -> LLAVE_A elementos_conjunto . LLAVE_C
-    (48) elementos_conjunto -> elementos_conjunto . COMA elemento
+    (50) conjunto_simbolos -> LLAVE_A elementos_conjunto . LLAVE_C
+    (53) elementos_conjunto -> elementos_conjunto . COMA elemento
 
     LLAVE_C         shift and go to state 81
     COMA            shift and go to state 82
@@ -855,26 +855,26 @@ state 64
 
 state 65
 
-    (47) elementos_conjunto -> elemento .
+    (52) elementos_conjunto -> elemento .
 
-    LLAVE_C         reduce using rule 47 (elementos_conjunto -> elemento .)
-    COMA            reduce using rule 47 (elementos_conjunto -> elemento .)
+    LLAVE_C         reduce using rule 52 (elementos_conjunto -> elemento .)
+    COMA            reduce using rule 52 (elementos_conjunto -> elemento .)
 
 
 state 66
 
-    (49) elemento -> SIMBOLO .
+    (54) elemento -> SIMBOLO .
 
-    LLAVE_C         reduce using rule 49 (elemento -> SIMBOLO .)
-    COMA            reduce using rule 49 (elemento -> SIMBOLO .)
+    LLAVE_C         reduce using rule 54 (elemento -> SIMBOLO .)
+    COMA            reduce using rule 54 (elemento -> SIMBOLO .)
 
 
 state 67
 
-    (50) elemento -> IDENTIFICADOR .
+    (55) elemento -> IDENTIFICADOR .
 
-    LLAVE_C         reduce using rule 50 (elemento -> IDENTIFICADOR .)
-    COMA            reduce using rule 50 (elemento -> IDENTIFICADOR .)
+    LLAVE_C         reduce using rule 55 (elemento -> IDENTIFICADOR .)
+    COMA            reduce using rule 55 (elemento -> IDENTIFICADOR .)
 
 
 state 68
@@ -895,8 +895,8 @@ state 68
 
 state 69
 
-    (46) conjunto_ids -> LLAVE_A elementos_conjunto . LLAVE_C
-    (48) elementos_conjunto -> elementos_conjunto . COMA elemento
+    (51) conjunto_ids -> LLAVE_A elementos_conjunto . LLAVE_C
+    (53) elementos_conjunto -> elementos_conjunto . COMA elemento
 
     LLAVE_C         shift and go to state 83
     COMA            shift and go to state 82
@@ -1054,16 +1054,16 @@ state 80
 
 state 81
 
-    (45) conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C .
+    (50) conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C .
 
-    PUNTOCOMA       reduce using rule 45 (conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C .)
+    PUNTOCOMA       reduce using rule 50 (conjunto_simbolos -> LLAVE_A elementos_conjunto LLAVE_C .)
 
 
 state 82
 
-    (48) elementos_conjunto -> elementos_conjunto COMA . elemento
-    (49) elemento -> . SIMBOLO
-    (50) elemento -> . IDENTIFICADOR
+    (53) elementos_conjunto -> elementos_conjunto COMA . elemento
+    (54) elemento -> . SIMBOLO
+    (55) elemento -> . IDENTIFICADOR
 
     SIMBOLO         shift and go to state 66
     IDENTIFICADOR   shift and go to state 67
@@ -1072,9 +1072,9 @@ state 82
 
 state 83
 
-    (46) conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C .
+    (51) conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C .
 
-    PUNTOCOMA       reduce using rule 46 (conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C .)
+    PUNTOCOMA       reduce using rule 51 (conjunto_ids -> LLAVE_A elementos_conjunto LLAVE_C .)
 
 
 state 84
@@ -1086,10 +1086,10 @@ state 84
 
 state 85
 
-    (48) elementos_conjunto -> elementos_conjunto COMA elemento .
+    (53) elementos_conjunto -> elementos_conjunto COMA elemento .
 
-    LLAVE_C         reduce using rule 48 (elementos_conjunto -> elementos_conjunto COMA elemento .)
-    COMA            reduce using rule 48 (elementos_conjunto -> elementos_conjunto COMA elemento .)
+    LLAVE_C         reduce using rule 53 (elementos_conjunto -> elementos_conjunto COMA elemento .)
+    COMA            reduce using rule 53 (elementos_conjunto -> elementos_conjunto COMA elemento .)
 
 
 state 86
@@ -1099,9 +1099,19 @@ state 86
     (36) atributos -> . atributos COMA atributo
     (37) atributo -> . IDENTIFICADOR ASIGNACION valor
     (38) atributo -> . INPUT ASIGNACION valor
+    (39) atributo -> . READ ASIGNACION valor
+    (40) atributo -> . WRITE ASIGNACION valor
+    (41) atributo -> . MOVE ASIGNACION valor
+    (42) atributo -> . POP ASIGNACION valor
+    (43) atributo -> . PUSH ASIGNACION valor
 
     IDENTIFICADOR   shift and go to state 87
     INPUT           shift and go to state 90
+    READ            shift and go to state 91
+    WRITE           shift and go to state 92
+    MOVE            shift and go to state 93
+    POP             shift and go to state 94
+    PUSH            shift and go to state 95
 
     atributos                      shift and go to state 88
     atributo                       shift and go to state 89
@@ -1110,7 +1120,7 @@ state 87
 
     (37) atributo -> IDENTIFICADOR . ASIGNACION valor
 
-    ASIGNACION      shift and go to state 91
+    ASIGNACION      shift and go to state 96
 
 
 state 88
@@ -1118,8 +1128,8 @@ state 88
     (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos . CORCHETE_B PUNTOCOMA
     (36) atributos -> atributos . COMA atributo
 
-    CORCHETE_B      shift and go to state 92
-    COMA            shift and go to state 93
+    CORCHETE_B      shift and go to state 97
+    COMA            shift and go to state 98
 
 
 state 89
@@ -1134,74 +1144,214 @@ state 90
 
     (38) atributo -> INPUT . ASIGNACION valor
 
-    ASIGNACION      shift and go to state 94
+    ASIGNACION      shift and go to state 99
 
 
 state 91
 
-    (37) atributo -> IDENTIFICADOR ASIGNACION . valor
-    (39) valor -> . SIMBOLO
-    (40) valor -> . EPSILON
-    (41) valor -> . IDENTIFICADOR
-    (42) valor -> . LEFT
-    (43) valor -> . RIGHT
-    (44) valor -> . STAY
+    (39) atributo -> READ . ASIGNACION valor
 
-    SIMBOLO         shift and go to state 97
-    EPSILON         shift and go to state 98
-    IDENTIFICADOR   shift and go to state 95
-    LEFT            shift and go to state 99
-    RIGHT           shift and go to state 100
-    STAY            shift and go to state 101
+    ASIGNACION      shift and go to state 100
 
-    valor                          shift and go to state 96
 
 state 92
 
-    (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B . PUNTOCOMA
+    (40) atributo -> WRITE . ASIGNACION valor
 
-    PUNTOCOMA       shift and go to state 102
+    ASIGNACION      shift and go to state 101
 
 
 state 93
 
-    (36) atributos -> atributos COMA . atributo
-    (37) atributo -> . IDENTIFICADOR ASIGNACION valor
-    (38) atributo -> . INPUT ASIGNACION valor
+    (41) atributo -> MOVE . ASIGNACION valor
 
-    IDENTIFICADOR   shift and go to state 87
-    INPUT           shift and go to state 90
+    ASIGNACION      shift and go to state 102
 
-    atributo                       shift and go to state 103
 
 state 94
 
-    (38) atributo -> INPUT ASIGNACION . valor
-    (39) valor -> . SIMBOLO
-    (40) valor -> . EPSILON
-    (41) valor -> . IDENTIFICADOR
-    (42) valor -> . LEFT
-    (43) valor -> . RIGHT
-    (44) valor -> . STAY
+    (42) atributo -> POP . ASIGNACION valor
 
-    SIMBOLO         shift and go to state 97
-    EPSILON         shift and go to state 98
-    IDENTIFICADOR   shift and go to state 95
-    LEFT            shift and go to state 99
-    RIGHT           shift and go to state 100
-    STAY            shift and go to state 101
+    ASIGNACION      shift and go to state 103
 
-    valor                          shift and go to state 104
 
 state 95
 
-    (41) valor -> IDENTIFICADOR .
+    (43) atributo -> PUSH . ASIGNACION valor
 
-    CORCHETE_B      reduce using rule 41 (valor -> IDENTIFICADOR .)
-    COMA            reduce using rule 41 (valor -> IDENTIFICADOR .)
+    ASIGNACION      shift and go to state 104
 
 
 state 96
+
+    (37) atributo -> IDENTIFICADOR ASIGNACION . valor
+    (44) valor -> . SIMBOLO
+    (45) valor -> . EPSILON
+    (46) valor -> . IDENTIFICADOR
+    (47) valor -> . LEFT
+    (48) valor -> . RIGHT
+    (49) valor -> . STAY
+
+    SIMBOLO         shift and go to state 107
+    EPSILON         shift and go to state 108
+    IDENTIFICADOR   shift and go to state 105
+    LEFT            shift and go to state 109
+    RIGHT           shift and go to state 110
+    STAY            shift and go to state 111
+
+    valor                          shift and go to state 106
+
+state 97
+
+    (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B . PUNTOCOMA
+
+    PUNTOCOMA       shift and go to state 112
+
+
+state 98
+
+    (36) atributos -> atributos COMA . atributo
+    (37) atributo -> . IDENTIFICADOR ASIGNACION valor
+    (38) atributo -> . INPUT ASIGNACION valor
+    (39) atributo -> . READ ASIGNACION valor
+    (40) atributo -> . WRITE ASIGNACION valor
+    (41) atributo -> . MOVE ASIGNACION valor
+    (42) atributo -> . POP ASIGNACION valor
+    (43) atributo -> . PUSH ASIGNACION valor
+
+    IDENTIFICADOR   shift and go to state 87
+    INPUT           shift and go to state 90
+    READ            shift and go to state 91
+    WRITE           shift and go to state 92
+    MOVE            shift and go to state 93
+    POP             shift and go to state 94
+    PUSH            shift and go to state 95
+
+    atributo                       shift and go to state 113
+
+state 99
+
+    (38) atributo -> INPUT ASIGNACION . valor
+    (44) valor -> . SIMBOLO
+    (45) valor -> . EPSILON
+    (46) valor -> . IDENTIFICADOR
+    (47) valor -> . LEFT
+    (48) valor -> . RIGHT
+    (49) valor -> . STAY
+
+    SIMBOLO         shift and go to state 107
+    EPSILON         shift and go to state 108
+    IDENTIFICADOR   shift and go to state 105
+    LEFT            shift and go to state 109
+    RIGHT           shift and go to state 110
+    STAY            shift and go to state 111
+
+    valor                          shift and go to state 114
+
+state 100
+
+    (39) atributo -> READ ASIGNACION . valor
+    (44) valor -> . SIMBOLO
+    (45) valor -> . EPSILON
+    (46) valor -> . IDENTIFICADOR
+    (47) valor -> . LEFT
+    (48) valor -> . RIGHT
+    (49) valor -> . STAY
+
+    SIMBOLO         shift and go to state 107
+    EPSILON         shift and go to state 108
+    IDENTIFICADOR   shift and go to state 105
+    LEFT            shift and go to state 109
+    RIGHT           shift and go to state 110
+    STAY            shift and go to state 111
+
+    valor                          shift and go to state 115
+
+state 101
+
+    (40) atributo -> WRITE ASIGNACION . valor
+    (44) valor -> . SIMBOLO
+    (45) valor -> . EPSILON
+    (46) valor -> . IDENTIFICADOR
+    (47) valor -> . LEFT
+    (48) valor -> . RIGHT
+    (49) valor -> . STAY
+
+    SIMBOLO         shift and go to state 107
+    EPSILON         shift and go to state 108
+    IDENTIFICADOR   shift and go to state 105
+    LEFT            shift and go to state 109
+    RIGHT           shift and go to state 110
+    STAY            shift and go to state 111
+
+    valor                          shift and go to state 116
+
+state 102
+
+    (41) atributo -> MOVE ASIGNACION . valor
+    (44) valor -> . SIMBOLO
+    (45) valor -> . EPSILON
+    (46) valor -> . IDENTIFICADOR
+    (47) valor -> . LEFT
+    (48) valor -> . RIGHT
+    (49) valor -> . STAY
+
+    SIMBOLO         shift and go to state 107
+    EPSILON         shift and go to state 108
+    IDENTIFICADOR   shift and go to state 105
+    LEFT            shift and go to state 109
+    RIGHT           shift and go to state 110
+    STAY            shift and go to state 111
+
+    valor                          shift and go to state 117
+
+state 103
+
+    (42) atributo -> POP ASIGNACION . valor
+    (44) valor -> . SIMBOLO
+    (45) valor -> . EPSILON
+    (46) valor -> . IDENTIFICADOR
+    (47) valor -> . LEFT
+    (48) valor -> . RIGHT
+    (49) valor -> . STAY
+
+    SIMBOLO         shift and go to state 107
+    EPSILON         shift and go to state 108
+    IDENTIFICADOR   shift and go to state 105
+    LEFT            shift and go to state 109
+    RIGHT           shift and go to state 110
+    STAY            shift and go to state 111
+
+    valor                          shift and go to state 118
+
+state 104
+
+    (43) atributo -> PUSH ASIGNACION . valor
+    (44) valor -> . SIMBOLO
+    (45) valor -> . EPSILON
+    (46) valor -> . IDENTIFICADOR
+    (47) valor -> . LEFT
+    (48) valor -> . RIGHT
+    (49) valor -> . STAY
+
+    SIMBOLO         shift and go to state 107
+    EPSILON         shift and go to state 108
+    IDENTIFICADOR   shift and go to state 105
+    LEFT            shift and go to state 109
+    RIGHT           shift and go to state 110
+    STAY            shift and go to state 111
+
+    valor                          shift and go to state 119
+
+state 105
+
+    (46) valor -> IDENTIFICADOR .
+
+    CORCHETE_B      reduce using rule 46 (valor -> IDENTIFICADOR .)
+    COMA            reduce using rule 46 (valor -> IDENTIFICADOR .)
+
+
+state 106
 
     (37) atributo -> IDENTIFICADOR ASIGNACION valor .
 
@@ -1209,47 +1359,47 @@ state 96
     COMA            reduce using rule 37 (atributo -> IDENTIFICADOR ASIGNACION valor .)
 
 
-state 97
+state 107
 
-    (39) valor -> SIMBOLO .
+    (44) valor -> SIMBOLO .
 
-    CORCHETE_B      reduce using rule 39 (valor -> SIMBOLO .)
-    COMA            reduce using rule 39 (valor -> SIMBOLO .)
-
-
-state 98
-
-    (40) valor -> EPSILON .
-
-    CORCHETE_B      reduce using rule 40 (valor -> EPSILON .)
-    COMA            reduce using rule 40 (valor -> EPSILON .)
+    CORCHETE_B      reduce using rule 44 (valor -> SIMBOLO .)
+    COMA            reduce using rule 44 (valor -> SIMBOLO .)
 
 
-state 99
+state 108
 
-    (42) valor -> LEFT .
+    (45) valor -> EPSILON .
 
-    CORCHETE_B      reduce using rule 42 (valor -> LEFT .)
-    COMA            reduce using rule 42 (valor -> LEFT .)
-
-
-state 100
-
-    (43) valor -> RIGHT .
-
-    CORCHETE_B      reduce using rule 43 (valor -> RIGHT .)
-    COMA            reduce using rule 43 (valor -> RIGHT .)
+    CORCHETE_B      reduce using rule 45 (valor -> EPSILON .)
+    COMA            reduce using rule 45 (valor -> EPSILON .)
 
 
-state 101
+state 109
 
-    (44) valor -> STAY .
+    (47) valor -> LEFT .
 
-    CORCHETE_B      reduce using rule 44 (valor -> STAY .)
-    COMA            reduce using rule 44 (valor -> STAY .)
+    CORCHETE_B      reduce using rule 47 (valor -> LEFT .)
+    COMA            reduce using rule 47 (valor -> LEFT .)
 
 
-state 102
+state 110
+
+    (48) valor -> RIGHT .
+
+    CORCHETE_B      reduce using rule 48 (valor -> RIGHT .)
+    COMA            reduce using rule 48 (valor -> RIGHT .)
+
+
+state 111
+
+    (49) valor -> STAY .
+
+    CORCHETE_B      reduce using rule 49 (valor -> STAY .)
+    COMA            reduce using rule 49 (valor -> STAY .)
+
+
+state 112
 
     (34) transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA .
 
@@ -1257,7 +1407,7 @@ state 102
     IDENTIFICADOR   reduce using rule 34 (transicion_def -> IDENTIFICADOR TRANSICION IDENTIFICADOR CORCHETE_A atributos CORCHETE_B PUNTOCOMA .)
 
 
-state 103
+state 113
 
     (36) atributos -> atributos COMA atributo .
 
@@ -1265,10 +1415,50 @@ state 103
     COMA            reduce using rule 36 (atributos -> atributos COMA atributo .)
 
 
-state 104
+state 114
 
     (38) atributo -> INPUT ASIGNACION valor .
 
     CORCHETE_B      reduce using rule 38 (atributo -> INPUT ASIGNACION valor .)
     COMA            reduce using rule 38 (atributo -> INPUT ASIGNACION valor .)
+
+
+state 115
+
+    (39) atributo -> READ ASIGNACION valor .
+
+    CORCHETE_B      reduce using rule 39 (atributo -> READ ASIGNACION valor .)
+    COMA            reduce using rule 39 (atributo -> READ ASIGNACION valor .)
+
+
+state 116
+
+    (40) atributo -> WRITE ASIGNACION valor .
+
+    CORCHETE_B      reduce using rule 40 (atributo -> WRITE ASIGNACION valor .)
+    COMA            reduce using rule 40 (atributo -> WRITE ASIGNACION valor .)
+
+
+state 117
+
+    (41) atributo -> MOVE ASIGNACION valor .
+
+    CORCHETE_B      reduce using rule 41 (atributo -> MOVE ASIGNACION valor .)
+    COMA            reduce using rule 41 (atributo -> MOVE ASIGNACION valor .)
+
+
+state 118
+
+    (42) atributo -> POP ASIGNACION valor .
+
+    CORCHETE_B      reduce using rule 42 (atributo -> POP ASIGNACION valor .)
+    COMA            reduce using rule 42 (atributo -> POP ASIGNACION valor .)
+
+
+state 119
+
+    (43) atributo -> PUSH ASIGNACION valor .
+
+    CORCHETE_B      reduce using rule 43 (atributo -> PUSH ASIGNACION valor .)
+    COMA            reduce using rule 43 (atributo -> PUSH ASIGNACION valor .)
 
