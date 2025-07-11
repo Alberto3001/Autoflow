@@ -58,9 +58,20 @@ def analizar_semantica(ast):
 
         # Identificador duplicado de estado
         if len(estados) != len(estados_lista):
-            errores.append({'message': f"Identificadores de estado duplicados en states en '{nombre}'", 'tipo': 'semántico'})
+            duplicados = set([x for x in estados_lista if estados_lista.count(x) > 1])
+            for dup in duplicados:
+                errores.append({'message': f"Estado duplicado '{dup}' en states en '{nombre}'", 'tipo': 'semántico'})
+
         if len(alfabeto) != len(alfabeto_lista):
-            errores.append({'message': f"Símbolos duplicados en alphabet en '{nombre}'", 'tipo': 'semántico'})
+            duplicados = set([x for x in alfabeto_lista if alfabeto_lista.count(x) > 1])
+            for dup in duplicados:
+                errores.append({'message': f"Símbolo duplicado '{dup}' en alphabet en '{nombre}'", 'tipo': 'semántico'})
+
+        # Estados duplicados en accept
+        if len(accept_states) != len(accept_states_lista):
+            duplicados = set([x for x in accept_states_lista if accept_states_lista.count(x) > 1])
+            for dup in duplicados:
+                errores.append({'message': f"Estado duplicado '{dup}' en accept en '{nombre}'", 'tipo': 'semántico'})
 
         # Estado inicial invalido
         if initial_state and initial_state not in estados:
@@ -76,21 +87,39 @@ def analizar_semantica(ast):
             if isinstance(conjunto, set) and len(conjunto) == 0:
                 errores.append({'message': f"El conjunto '{nombre_conjunto}' está vacío en '{nombre}'", 'tipo': 'semántico'})
 
-        # símbolo blanco
-        if blank_symbol and blank_symbol not in tape_alphabet:
-            errores.append({'message': f"El símbolo blank '{blank_symbol}' no está en tape_alphabet en '{nombre}'", 'tipo': 'semántico'})
+        # Validar propiedades de cinta y pila seung el tipo
+        if tipo in ['DFA', 'NFA']:
+            if stack_alphabet:
+                errores.append({'message': f"Propiedad 'stack_alphabet' no permitida en un {tipo} ('{nombre}')", 'tipo': 'semántico'})
+            if props.get('stack_start'):
+                errores.append({'message': f"Propiedad 'stack_start' no permitida en un {tipo} ('{nombre}')", 'tipo': 'semántico'})
+        if tipo in ['DFA', 'NFA', 'PDA']:
+            if tape_alphabet:
+                errores.append({'message': f"Propiedad 'tape_alphabet' no permitida en un {tipo} ('{nombre}')", 'tipo': 'semántico'})
+            if blank_symbol:
+                errores.append({'message': f"Propiedad 'blank' no permitida en un {tipo} ('{nombre}')", 'tipo': 'semántico'})
+        else:
+            if blank_symbol and blank_symbol not in tape_alphabet:
+                errores.append({'message': f"El símbolo blank '{blank_symbol}' no está en tape_alphabet en '{nombre}'", 'tipo': 'semántico'})
 
-        # Definición de stack_alphabet/tape_alphabet
-        if tipo in ['DFA', 'NFA'] and (stack_alphabet or props.get('stack_start')):
-            errores.append({'message': f"Propiedad de pila definida en un {tipo} ('{nombre}')", 'tipo': 'semántico'})
-        if tipo in ['DFA', 'NFA', 'PDA'] and (tape_alphabet or blank_symbol):
-            errores.append({'message': f"Propiedad de cinta definida en un {tipo} ('{nombre}')", 'tipo': 'semántico'})
-
-        # Múltiples estados iniciales
+        # Varios estados iniciales
         if isinstance(initial_state, (list, set)) and len(initial_state) > 1:
             errores.append({'message': f"Múltiples estados iniciales en '{nombre}'", 'tipo': 'semántico'})
 
-        # Revisar transiciones
+        # Validar que todos los símbolos del alfabeto sean de un solo carácter
+        for simbolo in alfabeto:
+            if not isinstance(simbolo, str) or len(simbolo) != 1:
+                errores.append({'message': f"Símbolo inválido '{simbolo}' en alphabet en '{nombre}'. Cada símbolo debe ser un solo carácter.", 'tipo': 'semántico'})
+
+        for simbolo in stack_alphabet:
+            if not isinstance(simbolo, str) or len(simbolo) != 1:
+                errores.append({'message': f"Símbolo inválido '{simbolo}' en stack_alphabet en '{nombre}'. Cada símbolo debe ser un solo carácter.", 'tipo': 'semántico'})
+
+        for simbolo in tape_alphabet:
+            if not isinstance(simbolo, str) or len(simbolo) != 1:
+                errores.append({'message': f"Símbolo inválido '{simbolo}' en tape_alphabet en '{nombre}'. Cada símbolo debe ser un solo carácter.", 'tipo': 'semántico'})
+
+        # Transiciones
         for trans in transiciones:
             if not isinstance(trans, tuple) or trans[0] != 'transicion':
                 continue
@@ -107,14 +136,26 @@ def analizar_semantica(ast):
             attr_names = set()
             for attr in atributos:
                 attr_name, attr_val = attr
+
+                if tipo in ['DFA', 'NFA'] and attr_name in ['pop', 'push', 'read', 'write', 'move']:
+                    errores.append({'message': f"Atributo '{attr_name}' no permitido en transición de un {tipo} ('{nombre}')", 'tipo': 'semántico'})
+                    continue 
+
+                if tipo == 'PDA' and attr_name in ['read', 'write', 'move']:
+                    errores.append({'message': f"Atributo '{attr_name}' no permitido en transición de un PDA ('{nombre}')", 'tipo': 'semántico'})
+                    continue
+
+                if tipo == 'TM' and attr_name in ['pop', 'push']:
+                    errores.append({'message': f"Atributo '{attr_name}' no permitido en transición de una TM ('{nombre}')", 'tipo': 'semántico'})
+                    continue
+
                 if attr_name in attr_names:
                     errores.append({'message': f"Atributo duplicado '{attr_name}' en transición de '{origen}' a '{destino}' en '{nombre}'", 'tipo': 'semántico'})
                 attr_names.add(attr_name)
-                # Símbolo de alfabeto no declarado
                 if attr_name in ['input', 'read'] and attr_val not in alfabeto:
                     errores.append({'message': f"Símbolo '{attr_val}' en atributo '{attr_name}' no está en alphabet en '{nombre}'", 'tipo': 'semántico'})
                 if attr_name in ['pop', 'push']:
-                    # Permitir EPSILON
+                    # Permite EPSILON
                     if isinstance(attr_val, str) and attr_val.upper() == 'EPSILON':
                         continue
                 
@@ -133,14 +174,34 @@ def analizar_semantica(ast):
                 # Valor de atributo incorrecto para move
                 if attr_name == 'move' and attr_val not in ['L', 'R', 'S', 'LEFT', 'RIGHT', 'STAY']:
                     errores.append({'message': f"Valor de atributo 'move' inválido: '{attr_val}' en transición de '{origen}' a '{destino}' en '{nombre}'", 'tipo': 'semántico'})
-                # Contar atributos de lectura/input
+                # Contar atributos de lectura o input
                 if attr_name == 'input':
                     input_count += 1
                 if attr_name == 'read':
                     read_count += 1
-                # INPUT como identificador de atributo irreconocido
+                # INPUT como identificador de atributo no conocido
                 if attr_name not in ['input', 'pop', 'push', 'read', 'write', 'move']:
                     errores.append({'message': f"Atributo irreconocido '{attr_name}' en transición de '{origen}' a '{destino}' en '{nombre}'", 'tipo': 'semántico'})
+
+                 # Validar que input, read, write sean de un solo carácter
+                if attr_name in ['input', 'read', 'write']:
+                    if not isinstance(attr_val, str) or len(attr_val) != 1:
+                        errores.append({'message': f"El valor de '{attr_name}' en la transición de '{origen}' a '{destino}' debe ser un solo carácter en '{nombre}'", 'tipo': 'semántico'})
+                    elif attr_val not in alfabeto and attr_name == 'input':
+                        errores.append({'message': f"Símbolo '{attr_val}' en atributo '{attr_name}' no está en alphabet en '{nombre}'", 'tipo': 'semántico'})
+                    elif attr_val not in tape_alphabet and attr_name in ['read', 'write']:
+                        errores.append({'message': f"Símbolo '{attr_val}' en atributo '{attr_name}' no está en tape_alphabet en '{nombre}'", 'tipo': 'semántico'})
+
+                # Validar push y pop en PDA
+                if attr_name in ['pop', 'push']:
+                    if isinstance(attr_val, str) and attr_val.upper() == 'EPSILON':
+                        continue
+                    for simbolo in attr_val:
+                        if len(simbolo) != 1:
+                            errores.append({'message': f"Símbolo '{simbolo}' en atributo '{attr_name}' no es un solo carácter en '{nombre}'", 'tipo': 'semántico'})
+                        if simbolo not in stack_alphabet:
+                            errores.append({'message': f"Símbolo '{simbolo}' en atributo '{attr_name}' no está en stack_alphabet en '{nombre}'", 'tipo': 'semántico'})
+
             if input_count > 1 or read_count > 1:
                 errores.append({'message': f"Transición de '{origen}' a '{destino}' tiene múltiples atributos de lectura/input en '{nombre}'", 'tipo': 'semántico'})
             # Transiciones incompletas para TM

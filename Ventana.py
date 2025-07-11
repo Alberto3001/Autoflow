@@ -429,11 +429,8 @@ class Compilador(Tk):
             pass
 
     def mostrar_errores_inteligentes(self):
-        """Muestra errores con análisis inteligente eliminando falsos positivos"""
-        # Primero, limpiar la consola
         self.output_console.delete(1.0, END)
         
-        # Combinar errores léxicos y sintácticos
         errores_combinados = []
         
         # Errores léxicos
@@ -443,28 +440,18 @@ class Compilador(Tk):
                     error['tipo'] = 'léxico'
                     errores_combinados.append(error)
         
-        # Errores sintácticos - filtrar falsos positivos
+        # Errores sintácticos
         if hasattr(AS, 'errores_Sinc_Desc'):
-            # Filtrar errores críticos primero (los más importantes)
-            errores_criticos = [e for e in AS.errores_Sinc_Desc if isinstance(e, dict) and e.get('is_critical', False)]
-            
-            # Si hay errores críticos, mostrar solo esos
-            if errores_criticos:
-                for error in errores_criticos:
+            for error in AS.errores_Sinc_Desc:
+                if isinstance(error, dict):
                     error['tipo'] = 'sintáctico'
                     errores_combinados.append(error)
-            else:
-                # Si no hay errores críticos, mostrar todos los errores sintácticos
-                for error in AS.errores_Sinc_Desc:
-                    if isinstance(error, dict):
-                        error['tipo'] = 'sintáctico'
-                        errores_combinados.append(error)
 
         #Errores Semanticos
-        if hasattr(self, 'errores_semanticos_detectados') and self.errores_semanticos_detectados:
+        if hasattr(self, 'errores_semanticos_detectados'):
             for error in self.errores_semanticos_detectados:
                 if isinstance(error, dict):
-                    error['tipo'] = 'semántico' # Asegurarse de que el tipo esté bien definido
+                    error['tipo'] = 'semántico'
                     errores_combinados.append(error)
         
         # Ordenar por línea para mostrar en orden
@@ -519,12 +506,15 @@ class Compilador(Tk):
                         "<Leave>", 
                         lambda e: self.output_console.config(cursor="")
                     )
+                else:
+                    self.output_console.insert(END, "\n") 
             
             # Mostrar un mensaje adicional si no se pudo completar el análisis
             if not resultadosSintactico:
                 self.output_console.insert(END, "\nNo se pudo completar el análisis sintáctico debido a errores.\n")
 
     def compilar(self):
+        self.errores_semanticos_detectados = []
         lin = self.text_editor.get(1.0, "end-1c").count("\n")+1
         limpiar_errores_lex()
         limpiar_errores()  # Reiniciar también las variables de errores sintácticos
@@ -544,19 +534,9 @@ class Compilador(Tk):
         resultadosSintactico = AS.test_parser(codigo, lexer=lexer)
         print("AST generado:", resultadosSintactico)
 
-        # Mostrar errores semánticos si el análisis sintáctico fue exitoso
-        self.errores_semanticos_detectados = [] 
+        # Recuperar errores semánticos
         if resultadosSintactico:
-            errores_semanticos = ASEM.analizar_semantica(resultadosSintactico)
-            self.errores_semanticos_detectados = errores_semanticos 
-            if errores_semanticos:
-                self.output_console.insert(END, "\nErrores semánticos encontrados:\n")
-                for error in errores_semanticos:
-                    self.output_console.insert(END, f"- {error['message']}\n")
-            else:
-                self.output_console.insert(END, "\nAnálisis semántico exitoso. No se encontraron errores semánticos.\n")
-            self.output_console.insert(END, "\nResultado del análisis sintáctico:\n")
-            self.output_console.insert(END, str(resultadosSintactico) + "\n")
+            self.errores_semanticos_detectados = ASEM.analizar_semantica(resultadosSintactico)
         
         # Imprimir resultados y errores para depuración
         print("Errores léxicos:", AL.errores_Desc)
