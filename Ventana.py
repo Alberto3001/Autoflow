@@ -10,6 +10,7 @@ from AnalizadorSintactico import limpiar_errores
 import tkinter as tk
 import re
 import AnalizadorSemantico as ASEM
+from CodigoIntermedio import generar_tripletas_cuadruplas
 
 
 resultados = []
@@ -128,6 +129,8 @@ class Compilador(Tk):
         self.btn_compilar.pack(side="left", padx=5)
         self.btn_tokens = ttk.Button(self.buttons_compiler_panel, text="Tokens", command=self.Tokens)
         self.btn_tokens.pack(side="left", padx=5)
+        self.btn_codigo_intermedio = ttk.Button(self.buttons_compiler_panel, text="Código Intermedio", command=self.mostrar_codigo_intermedio, state="disabled")
+        self.btn_codigo_intermedio.pack(side="left", padx=5)
 
         # Consola de salida
         self.console_frame = ttk.Frame(self, width=30)
@@ -513,6 +516,12 @@ class Compilador(Tk):
             if not resultadosSintactico:
                 self.output_console.insert(END, "\nNo se pudo completar el análisis sintáctico debido a errores.\n")
 
+    #Función para mostrar codigo intermedio
+    def mostrar_codigo_intermedio(self):
+        from VentanaCodigoIntermedio import VentanaCodigoIntermedio
+        ventana = VentanaCodigoIntermedio(tripletas=getattr(self, "tripletas", []), cuadruplas=getattr(self, "cuadruplas", []))
+        ventana.grab_set()
+
     def compilar(self):
         self.errores_semanticos_detectados = []
         lin = self.text_editor.get(1.0, "end-1c").count("\n")+1
@@ -551,6 +560,13 @@ class Compilador(Tk):
             if not resultadosSintactico:
                 self.output_console.insert(END, "\nNo se pudo completar el análisis sintáctico debido a errores.\n")
 
+        if resultadosSintactico and not self.errores_semanticos_detectados:
+            tripletas, cuadruplas = generar_tripletas_cuadruplas(resultadosSintactico)
+            self.tripletas = tripletas
+            self.cuadruplas = cuadruplas
+            self.btn_codigo_intermedio.config(state="normal")
+        else:
+            self.btn_codigo_intermedio.config(state="disabled")
 if __name__ == "__main__":
     app = Compilador()
     app.mainloop()
