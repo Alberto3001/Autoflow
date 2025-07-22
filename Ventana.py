@@ -11,6 +11,8 @@ import tkinter as tk
 import re
 import AnalizadorSemantico as ASEM
 from CodigoIntermedio import generar_tripletas_cuadruplas
+from GeneradorCodigoObjeto import generar_ensamblador_emu8086, generar_pseudoensamblador
+from guardar import guardar_y_abrir_codigo
 
 
 resultados = []
@@ -131,6 +133,8 @@ class Compilador(Tk):
         self.btn_tokens.pack(side="left", padx=5)
         self.btn_codigo_intermedio = ttk.Button(self.buttons_compiler_panel, text="Código Intermedio", command=self.mostrar_codigo_intermedio, state="disabled")
         self.btn_codigo_intermedio.pack(side="left", padx=5)
+        self.btn_generar_codigo_objeto = ttk.Button(self.buttons_compiler_panel, text="Generar Código Objeto", command=self.generar_codigo_objeto, state="disabled")
+        self.btn_generar_codigo_objeto.pack(side="left", padx=5)
 
         # Consola de salida
         self.console_frame = ttk.Frame(self, width=30)
@@ -364,42 +368,28 @@ class Compilador(Tk):
             self.guardar_como_archivo()
         
     def tamañoMas(self):
-         # Obtiene la fuente actual del editor de texto
-        font_str = app.text_editor.cget("font")
-        # Crea un objeto de fuente Tkinter a partir de la cadena de la fuente
+        font_str = self.text_editor.cget("font")
         font = tkFont.Font(font=font_str)
-        # Incrementa el tamaño de la fuente
         font.configure(size=font.actual()["size"] + 2)
-        # Aplica la nueva fuente al editor de texto
-        app.text_editor.config(font=font)
-        app.line_numbers_text.config(font=font)
-        app.output_console.config(font=font)
-        
+        self.text_editor.config(font=font)
+        self.line_numbers_text.config(font=font)
+        self.output_console.config(font=font)
         self.text_editor.config(height=1, width=1)
         self.line_numbers_text.config(height=1, width=4)
         self.console_frame.config(width=30)
         self.output_console.config(height=0.1, width=1)
-        
-        # Reconfigurar tags después del cambio de fuente
         self.after_idle(self.configure_tags)
 
     def tamañoMenos(self):
-         # Obtiene la fuente actual del editor de texto
-        font_str = app.text_editor.cget("font")
-        # Crea un objeto de fuente Tkinter a partir de la cadena de la fuente
+        font_str = self.text_editor.cget("font")
         font = tkFont.Font(font=font_str)
-        # Incrementa el tamaño de la fuente
         font.configure(size=font.actual()["size"] - 2)
-        # Aplica la nueva fuente al editor de texto
-        app.text_editor.config(font=font)
-        app.line_numbers_text.config(font=font)
-        app.output_console.config(font=font)
-        
+        self.text_editor.config(font=font)
+        self.line_numbers_text.config(font=font)
+        self.output_console.config(font=font)
         self.text_editor.config(height=1, width=1)
         self.line_numbers_text.config(height=1, width=2)
         self.output_console.config(height=0.1, width=1)
-        
-        # Reconfigurar tags después del cambio de fuente
         self.after_idle(self.configure_tags)
 
     def Tokens(self):
@@ -565,8 +555,27 @@ class Compilador(Tk):
             self.tripletas = tripletas
             self.cuadruplas = cuadruplas
             self.btn_codigo_intermedio.config(state="normal")
+            self.btn_generar_codigo_objeto.config(state="normal")
         else:
             self.btn_codigo_intermedio.config(state="disabled")
+            self.btn_generar_codigo_objeto.config(state="disabled")
+
+    def generar_codigo_objeto(self, nombre_automata="automata", tipo_automata="DFA"):
+        """
+        Genera y guarda automáticamente el código ensamblador (.asm) y pseudoensamblador (.txt),
+        y los abre al finalizar.
+        """
+        if not hasattr(self, "cuadruplas") or not self.cuadruplas:
+            messagebox.showerror("Error", "No hay cuádruplas generadas.")
+            return
+        # Ensamblador EMU8086
+        asm_code = generar_ensamblador_emu8086(self.cuadruplas, nombre_automata, tipo_automata)
+        guardar_y_abrir_codigo(asm_code, f"{nombre_automata}.asm")
+        # Pseudoensamblador
+        pseudo_code = generar_pseudoensamblador(self.cuadruplas)
+        guardar_y_abrir_codigo(pseudo_code, f"{nombre_automata}_pseudo.txt")
+        messagebox.showinfo("Éxito", "Código ensamblador y pseudoensamblador generados y abiertos.")
+
 if __name__ == "__main__":
     app = Compilador()
     app.mainloop()

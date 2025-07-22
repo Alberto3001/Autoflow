@@ -8,25 +8,20 @@ def generar_tripletas_cuadruplas(ast):
             continue
 
         nombre_automata = automata[1]
-        definicion_automa = automata[2] # ('definicion', propiedades, transiciones_def)
+        definicion_automa = automata[2]
 
         propiedades_ast = definicion_automa[1]
-        # Asegúrate de extraer las transiciones correctamente, ya que es una tupla ('transitions', [lista])
         transiciones_ast = definicion_automa[2][1] if definicion_automa[2][0] == 'transitions' else []
 
         # --- Lógica de GENERACIÓN DE TRIPLETAS ---
-        # Agrega una tripleta al inicio de cada autómata
         tripletas.append((instruccion_num, 'PARSE_AUTOMATON', nombre_automata, None))
         instruccion_num += 1
 
-        # Itera sobre las propiedades para generar tripletas de identificación de elementos
         tripletas.append((instruccion_num, 'BEGIN_PROPERTIES', nombre_automata, None))
         instruccion_num += 1
         for prop in propiedades_ast:
             prop_key = prop[0]
             prop_value = prop[1]
-            # Para propiedades que son conjuntos (alphabet, states, accept, etc.), itera sobre sus elementos.
-            # Para otras propiedades (type, initial, blank), usa el valor directamente.
             if isinstance(prop_value, set): # Manejo de conjuntos
                 for item in prop_value:
                     if prop_key == 'alphabet':
@@ -44,7 +39,7 @@ def generar_tripletas_cuadruplas(ast):
                     elif prop_key == 'accept':
                         tripletas.append((instruccion_num, 'IDENTIFY_ACCEPT', item, None))
                         instruccion_num += 1
-            else: # Manejo de valores simples (type, initial, blank)
+            else:
                 if prop_key == 'type':
                     tripletas.append((instruccion_num, 'IDENTIFY_TYPE', prop_value, None))
                     instruccion_num += 1
@@ -79,7 +74,6 @@ def generar_tripletas_cuadruplas(ast):
         # Cuádruplo para el inicio de la definición del autómata
         cuadruplas.append(('START_AUTOMATON_DEF', nombre_automata, None, None))
 
-        # Itera sobre las propiedades para generar cuádruplos detallados de configuración
         for prop in propiedades_ast:
             prop_key = prop[0]
             prop_value = prop[1]
