@@ -1,3 +1,4 @@
+
 import ply.lex as lex
 import ply.yacc as yacc
 from tkinter import *
@@ -13,6 +14,7 @@ import AnalizadorSemantico as ASEM
 from CodigoIntermedio import generar_tripletas_cuadruplas
 from GeneradorCodigoObjeto import generar_ensamblador_emu8086, generar_pseudoensamblador
 from guardar import guardar_y_abrir_codigo
+import os
 
 
 resultados = []
@@ -135,6 +137,9 @@ class Compilador(Tk):
         self.btn_codigo_intermedio.pack(side="left", padx=5)
         self.btn_generar_codigo_objeto = ttk.Button(self.buttons_compiler_panel, text="Generar Código Objeto", command=self.generar_codigo_objeto, state="disabled")
         self.btn_generar_codigo_objeto.pack(side="left", padx=5)
+
+        self.btn_generar_automata_grafico = ttk.Button(self.buttons_compiler_panel, text="Generar Autómata Gráfico", command=self.generar_automata_grafico, state="disabled")
+        self.btn_generar_automata_grafico.pack(side="left", padx=5)
 
         # Consola de salida
         self.console_frame = ttk.Frame(self, width=30)
@@ -514,18 +519,25 @@ class Compilador(Tk):
 
     def compilar(self):
         self.errores_semanticos_detectados = []
+        # Limpiar tripletas y cuadruplas antes de compilar para evitar usar datos viejos
+        if hasattr(self, 'tripletas'):
+            del self.tripletas
+        if hasattr(self, 'cuadruplas'):
+            del self.cuadruplas
+        if hasattr(self, 'tipo_automata'):
+            del self.tipo_automata
         lin = self.text_editor.get(1.0, "end-1c").count("\n")+1
         limpiar_errores_lex()
         limpiar_errores()  # Reiniciar también las variables de errores sintácticos
         self.output_console.delete(1.0, END)
         codigo = self.text_editor.get("1.0", END)
-        
+
         # Análisis léxico
         global resultados
         resultados = AL.analisis(codigo)
         self.update_line_numbers()
         self.resaltar_palabras_reservadas()
-        
+
         # Análisis sintáctico
         global resultadosSintactico
         lexer = AL.lexer
@@ -536,14 +548,14 @@ class Compilador(Tk):
         # Recuperar errores semánticos
         if resultadosSintactico:
             self.errores_semanticos_detectados = ASEM.analizar_semantica(resultadosSintactico)
-        
+
         # Imprimir resultados y errores para depuración
         print("Errores léxicos:", AL.errores_Desc)
         print("Errores sintácticos:", AS.errores_Sinc_Desc)
-        
+
         # Usar la función mejorada para mostrar errores
         self.mostrar_errores_inteligentes()
-        
+
         # Verificar explícitamente si hay errores
         if (hasattr(AL, 'errores_Desc') and AL.errores_Desc) or (hasattr(AS, 'errores_Sinc_Desc') and AS.errores_Sinc_Desc):
             # Hay errores, no mostrar "compilación exitosa" adicional
@@ -554,27 +566,62 @@ class Compilador(Tk):
             tripletas, cuadruplas = generar_tripletas_cuadruplas(resultadosSintactico)
             self.tripletas = tripletas
             self.cuadruplas = cuadruplas
+            # Detectar tipo de autómata desde las cuádruplas
+            tipo_automata = "DFA"  # Valor por defecto
+            for cuad in cuadruplas:
+                if cuad[0] == "SET_TYPE" and cuad[2]:
+                    tipo_automata = str(cuad[2]).strip().upper()
+                    break
+            self.tipo_automata = tipo_automata
             self.btn_codigo_intermedio.config(state="normal")
             self.btn_generar_codigo_objeto.config(state="normal")
+            self.btn_generar_automata_grafico.config(state="normal")
         else:
             self.btn_codigo_intermedio.config(state="disabled")
             self.btn_generar_codigo_objeto.config(state="disabled")
+            self.btn_generar_automata_grafico.config(state="disabled")
 
-    def generar_codigo_objeto(self, nombre_automata="automata", tipo_automata="DFA"):
+    def generar_codigo_objeto(self, nombre_automata="automata", tipo_automata=None):
         """
-        Genera y guarda automáticamente el código ensamblador (.asm) y pseudoensamblador (.txt),
-        y los abre al finalizar.
+        Genera y guarda automáticamente el código ensamblador (.asm) y pseudoensamblador (.txt), y los abre al finalizar.
         """
         if not hasattr(self, "cuadruplas") or not self.cuadruplas:
             messagebox.showerror("Error", "No hay cuádruplas generadas.")
             return
-        # Ensamblador EMU8086
+        # Usar tipo_automata detectado si no se pasa explícitamente
+        if tipo_automata is None:
+            tipo_automata = getattr(self, "tipo_automata", "DFA")
         asm_code = generar_ensamblador_emu8086(self.cuadruplas, nombre_automata, tipo_automata)
         guardar_y_abrir_codigo(asm_code, f"{nombre_automata}.asm")
-        # Pseudoensamblador
         pseudo_code = generar_pseudoensamblador(self.cuadruplas)
         guardar_y_abrir_codigo(pseudo_code, f"{nombre_automata}_pseudo.txt")
-        messagebox.showinfo("Éxito", "Código ensamblador y pseudoensamblador generados y abiertos.")
+
+    def generar_automata_grafico(self, nombre_automata="automata", tipo_automata=None):
+        """
+        Genera y abre el archivo DOT (.dot) y la imagen PNG del autómata.
+        """
+        if not hasattr(self, "cuadruplas") or not self.cuadruplas:
+            messagebox.showerror("Error", "No hay cuádruplas generadas.")
+            return
+        try:
+            from GeneradorGrafos import generar_dibujo_automata, abrir_imagen_automata
+            # Usar tipo_automata detectado si no se pasa explícitamente
+            if tipo_automata is None:
+                tipo_automata = getattr(self, "tipo_automata", "DFA")
+            png_path = generar_dibujo_automata(self.cuadruplas, nombre_automata, tipo_automata)
+            dot_path = f"{nombre_automata}.dot"
+            if os.path.exists(dot_path):
+                try:
+                    os.startfile(dot_path)
+                except Exception:
+                    pass
+            if png_path and os.path.exists(png_path):
+                abrir_imagen_automata(png_path)
+                messagebox.showinfo("Éxito", "Archivo DOT y PNG generados y abiertos.")
+            else:
+                messagebox.showwarning("Advertencia", "No se pudo generar la imagen PNG del autómata. Verifica la instalación de Graphviz.")
+        except ImportError:
+            messagebox.showwarning("Advertencia", "No se encontró GeneradorGrafos.py. Solo se generó el archivo DOT.")
 
 if __name__ == "__main__":
     app = Compilador()
