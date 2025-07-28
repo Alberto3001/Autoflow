@@ -3,6 +3,7 @@ import ply.lex as lex
 import ply.yacc as yacc
 from tkinter import *
 from tkinter import filedialog,scrolledtext, ttk, messagebox
+import pygame  # Para reproducción de sonido
 import tkinter.font as tkFont
 import AnalizadorLexico as AL
 from AnalizadorLexico import limpiar_errores_lex
@@ -576,6 +577,21 @@ class Compilador(Tk):
             self.btn_codigo_intermedio.config(state="normal")
             self.btn_generar_codigo_objeto.config(state="normal")
             self.btn_generar_automata_grafico.config(state="normal")
+            
+            # Reproducir sonido de éxito
+            try:
+                import pygame
+                pygame.mixer.init()
+                pygame.mixer.music.load("succes.mp3")
+                pygame.mixer.music.play()
+            except Exception as e:
+                print(f"Error reproduciendo sonido: {e}")
+                # Fallback a winsound si pygame falla
+                try:
+                    import winsound
+                    winsound.PlaySound("SystemAsterisk", winsound.SND_ALIAS)
+                except:
+                    pass
         else:
             self.btn_codigo_intermedio.config(state="disabled")
             self.btn_generar_codigo_objeto.config(state="disabled")

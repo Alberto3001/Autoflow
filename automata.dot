@@ -1,12 +1,13 @@
 digraph "Automata automata" {
     rankdir=LR; // Dirección del grafo: de izquierda a derecha
+    "q2" [label="q2", shape=circle];
     "q1" [label="q1", shape=circle];
-    "q2" [label="q2", shape=doublecircle];
+    "qf" [label="qf", shape=doublecircle];
     "q0" [label="q0", shape=circle];
     node [shape=none, width=0, height=0]; start_node;
     start_node -> "q0";
-    "q0" -> "q1" [label="a,Z/AZ"];
-    "q1" -> "q1" [label="a,A/AA"];
-    "q1" -> "q2" [label="b,A/EPSILON"];
-    "q2" -> "q2" [label="b,A/EPSILON"];
+    "q0" -> "q1" [label="a/X,R"];
+    "q1" -> "q1" [label="a/a,R"];
+    "q1" -> "q2" [label="b/Y,L"];
+    "q2" -> "qf" [label="X/X,R"];
 }
